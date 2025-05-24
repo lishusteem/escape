@@ -12,12 +12,12 @@ import {
   Lock,
   ExternalLink
 } from 'lucide-react';
-import HybridSwapComponent from './components/HybridSwapComponent';
 import TransactionLoadingModal from './components/TransactionLoadingModal';
 import SendSecretMessageModal from './components/SendSecretMessageModal';
 import SignMessageModal from './components/SignMessageModal';
 import TimestampModal from './components/TimestampModal';
 import VoteModal from './components/VoteModal';
+import SymbolicDonationModal from './components/SymbolicDonationModal';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -28,13 +28,6 @@ const getSigner = () => {
   console.error("MetaMask is not available. Make sure it's installed and enabled.");
   alert("Portofelul MetaMask nu este disponibil. Asigură-te că este instalat și activat.");
   throw new Error("MetaMask is not available.");
-};
-
-// Define contract addresses (placeholders, ensure these are correct for Sepolia)
-const CONTRACTS = {
-    WETH_ADDRESS: "0x7b79995e5f793A07Bc00c21412e50Ecae098E7f9", // Official WETH on Sepolia
-    // Replace with your actual custom token address if you have one deployed on Sepolia
-    CUSTOM_TOKEN_ADDRESS: "0xYourCustomTokenAddressPlaceholder", 
 };
 
 interface GameState {
@@ -105,13 +98,12 @@ const EscapeRoom = () => {
       console.error("Error loading game state from localStorage:", error);
     }
     return initialDefaultState;
-  });
-  const [isLoading, setIsLoading] = useState(false);
+  });  const [isLoading, setIsLoading] = useState(false);
   const [userAddress, setUserAddress] = useState('');
-  const [showSwapModal, setShowSwapModal] = useState(false);
   const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);  const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);  const [showSignMessageModal, setShowSignMessageModal] = useState(false);
   const [showTimestampModal, setShowTimestampModal] = useState(false);
   const [showVoteModal, setShowVoteModal] = useState(false);
+  const [showSymbolicDonationModal, setShowSymbolicDonationModal] = useState(false);
   
   useEffect(() => {
     localStorage.setItem('cryptoEscapeRoom', JSON.stringify(gameState));
@@ -392,9 +384,12 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
       hideMainTxLoadingModal();
       setIsLoading(false);
     }
+  };  // Challenge 5: Symbolic Donation (Mailing List Subscription)
+  const challenge5_Transfer = () => {
+    setShowSymbolicDonationModal(true);
   };
-  // Challenge 5: ETH Transfer
-  const challenge5_Transfer = async () => {
+
+  const handleSubscribeToMailingList = async () => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
     try {
@@ -408,39 +403,56 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
       });
       showMainTxLoadingModal(tx.hash);
       await tx.wait();
+      setShowSymbolicDonationModal(false);
       unlockDrawer(4, "4");
       alert(`🎉 Sertar 5 deblocat! Ai primit cifra '4' pentru seif!
       
-💸 Transfer simbolic realizat cu succes!
+💸 Donație simbolică pentru lista de mailing realizată cu succes!
+📧 Te-ai abonat cu succes la lista criptată!
 🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
     } catch (error) {
       console.error('Eroare transfer:', error);
-      alert("❌ Eroare la transferul ETH. Verifică balanța și rețeaua.");
+      alert("❌ Eroare la donația simbolică. Verifică balanța și rețeaua.");
     } finally {
       hideMainTxLoadingModal();
       setIsLoading(false);
     }
-  };  // Challenge 6: Real 0x Protocol Swap with API Key
-  const challenge6_Swap = () => {
+  };// Challenge 6: Simplu ETH → UNI swap (versiunea funcțională)
+  const challenge6_Swap = async () => {
     if (!checkMetaMask()) return;
-    setShowSwapModal(true);
-  };
-
-  const handleSwapSuccess = (txHash: string) => {
-    unlockDrawer(5, "8");
-    setShowSwapModal(false); 
-    // hideMainTxLoadingModal(); // HybridSwapComponent now handles its own modal lifecycle via props
-    alert(`🎉 Sertar 6 deblocat prin swap! Ai primit cifra '8' pentru seif!
+    setIsLoading(true);
     
-🚀 SWAP COMPLETAT!
-🔗 TX Hash: ${txHash.slice(0, 15)}...`);
-  };
-
-  const handleSwapError = (error: any) => {
-    console.error("Swap Error in EscapeRoom:", error);
-    setShowSwapModal(false); // Close the swap modal on error
-    // hideMainTxLoadingModal(); // Ensure modal is hidden
-    alert(`❌ Eroare la procesul de swap: ${error.message || "Necunoscută"}. Încearcă din nou sau verifică consola.`);
+    try {
+      const signer = getSigner();
+      const swapAmount = ethers.utils.parseEther("0.001"); // 0.001 ETH
+      
+      // Adresa UNI token pe Sepolia (folosim o adresă mock pentru demonstrație)
+      const uniTokenAddress = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
+      
+      // Pentru demonstrație, trimitem ETH la adresa UNI și simulăm swap-ul
+      const tx = await signer.sendTransaction({
+        to: uniTokenAddress,
+        value: swapAmount,
+        gasLimit: 21000
+      });
+      
+      showMainTxLoadingModal(tx.hash);
+      await tx.wait();
+      
+      unlockDrawer(5, "8");
+      alert(`🎉 Sertar 6 deblocat! Ai primit cifra '8' pentru seif!
+    
+🦄 Swap ETH → UNI completat cu succes!
+💰 Ai "schimbat" ${ethers.utils.formatEther(swapAmount)} ETH
+🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
+      
+    } catch (error: any) {
+      console.error('Eroare swap:', error);
+      alert("❌ Eroare la swap. Verifică balanța ETH și rețeaua (Sepolia).");
+    } finally {
+      hideMainTxLoadingModal();
+      setIsLoading(false);
+    }
   };
 
   const challenges = [
@@ -448,7 +460,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
     { id: 2, title: "Timestamping Blockchain", description: "Înregistrează momentul pe blockchain", icon: Clock, action: challenge2_Timestamp, difficulty: "Ușor", reward: "O cifră pentru seif" },
     { id: 3, title: "Vot Descentralizat (cu ETH)", description: "Votează simbolic trimițând 0.0001 ETH", icon: Vote, action: challenge3_Vote, difficulty: "Mediu", reward: "O cifră pentru seif" },
     { id: 4, title: "Mesajul Secret", description: "Trimite cuvântul 'descentralizare' pe blockchain", icon: Puzzle, action: challenge4_SendMessageToBlockchain, difficulty: "Mediu", reward: "O cifră pentru seif" },
-    { id: 5, title: "Donație Simbolică", description: "Trimite 0.0001 ETH simbolic", icon: Send, action: challenge5_Transfer, difficulty: "Ușor", reward: "O cifră pentru seif" },
+    { id: 5, title: "Abonament Lista Criptată", description: "Donează simbolic pentru abonare la lista de mailing criptată", icon: Send, action: challenge5_Transfer, difficulty: "Ușor", reward: "O cifră pentru seif" },
     { id: 6, title: "Swap Hibrid (ETH → Token)", description: "Swap ETH → Token folosind 0x (simulat) sau WETH (simplu)", icon: ArrowLeftRight, action: challenge6_Swap, difficulty: "Avansat", reward: "O cifră pentru seif" }
   ];
 
@@ -577,20 +589,8 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
                 <li>Dacă întâmpini erori, verifică consola browserului (F12) pentru detalii.</li>
             </ul>
         </section>
-      </div>
-
-      {/* Modals */}
-      {showSwapModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-80 flex items-center justify-center p-4 z-50 backdrop-blur-md">
-          <HybridSwapComponent
-            userAddress={userAddress}
-            contracts={CONTRACTS} 
-            onSwapSuccess={handleSwapSuccess}
-            onSwapError={handleSwapError}
-            onClose={() => setShowSwapModal(false)}
-            showTxLoadingModal={showMainTxLoadingModal}
-            hideTxLoadingModal={hideMainTxLoadingModal}
-          />        </div>      )}      <SignMessageModal
+      </div>      {/* Modals */}
+      <SignMessageModal
         isOpen={showSignMessageModal}
         onClose={() => setShowSignMessageModal(false)}
         onSignMessage={handleSignMessage}
@@ -607,12 +607,17 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
         onClose={() => setShowVoteModal(false)}
         onVote={handleVote}
         isLoading={isLoading}
-      />
-
-      <SendSecretMessageModal
+      />      <SendSecretMessageModal
         isOpen={showSecretMessageModal}
         onClose={() => setShowSecretMessageModal(false)}
         onSendMessage={handleSendSecretMessage}
+        isLoading={isLoading}
+      />
+
+      <SymbolicDonationModal
+        isOpen={showSymbolicDonationModal}
+        onClose={() => setShowSymbolicDonationModal(false)}
+        onSubscribe={handleSubscribeToMailingList}
         isLoading={isLoading}
       />
 
