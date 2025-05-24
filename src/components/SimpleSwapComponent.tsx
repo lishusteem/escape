@@ -5,18 +5,41 @@ import { useUniSwap } from '../hooks/useEthSwap';
 interface SimpleSwapComponentProps {
   onSwapSuccess?: (txHash: string) => void;
   onError?: (error: string) => void;
+  onTxSent?: (txHash: string) => void;      // Callback when transaction is sent
+  // onTxConfirmed is effectively onSwapSuccess for this component's parent
 }
 
 const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
   onSwapSuccess,
-  onError
+  onError,
+  onTxSent,
 }) => {  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
   const [signer, setSigner] = useState<ethers.providers.JsonRpcSigner | null>(null);
   const [account, setAccount] = useState('');
   const [ethAmount, setEthAmount] = useState('0.01');
   const [balance, setBalance] = useState('0');
 
-  const { quote, loading, error, txHash, getSwapQuote, executeSwap, resetState } = useUniSwap();
+  const { 
+    quote, 
+    loading, 
+    isConfirming, 
+    error,
+    txHash, 
+    swapSuccess, 
+    getSwapQuote, 
+    executeSwap, 
+    resetState 
+  } = useUniSwap({
+    onTxSent: (hash) => {
+      if (onTxSent) onTxSent(hash);
+    },
+    onTxConfirmed: (hash) => {
+      if (onSwapSuccess) onSwapSuccess(hash);
+    },
+    onTxError: (err) => {
+      if (onError) onError(err.message || 'A apărut o eroare la swap.');
+    }
+  });
 
   const SEPOLIA_CHAIN_ID = 11155111;
 
@@ -65,28 +88,63 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
       const interval = setInterval(updateBalance, 10000);
       return () => clearInterval(interval);
     }
-  }, [provider, account]);
+  }, [provider, account]);  // useEffect to get initial/updated quote when wallet is connected or ethAmount changes.
+  useEffect(() => {
+    let timeoutId: number;
+
+    const fetchQuoteForCurrentAmount = async () => {
+      if (account && signer && provider && ethAmount && parseFloat(ethAmount) > 0) {
+        await getSwapQuote(ethAmount, signer);
+      }
+    };
+
+    if (account && signer && provider && ethAmount && parseFloat(ethAmount) > 0) {
+      // Add a small delay to debounce rapid changes
+      timeoutId = setTimeout(() => {
+        fetchQuoteForCurrentAmount();
+      }, 500); // 500ms debounce
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [account, signer, provider, ethAmount, getSwapQuote]); // Include getSwapQuote but it's now memoized
+
   // Handle swap process
   const handleSwap = async () => {
     if (!signer) {
       if (onError) onError('Conectați wallet-ul mai întâi!');
       return;
     }
+    if (!ethAmount || parseFloat(ethAmount) <= 0) {
+      // Error will be set by getSwapQuote if amount is invalid regarding balance
+      // but good to have a basic check here too.
+      if (onError) onError('Suma ETH trebuie să fie un număr pozitiv valid.');
+      return;
+    }
 
     try {
-      // Get quote
-      await getSwapQuote(ethAmount, signer);
-      
-      // Execute swap immediately after getting quote
-      const resultTxHash = await executeSwap(signer);
-      
-      if (onSwapSuccess && resultTxHash) {
-        onSwapSuccess(resultTxHash);
+      // setLoading(true) is handled by the hook now
+      const currentQuote = await getSwapQuote(ethAmount, signer);
+      if (!currentQuote || error) { // Check error state from hook after getSwapQuote
+        // onError would have been called by the hook if getSwapQuote failed
+        return;
       }
-    } catch (err: any) {
-      const errorMsg = err.message || 'Swap-ul a eșuat';
+      
+      // executeSwap will call onTxSent, onTxConfirmed, onTxError via the hook
+      await executeSwap(signer);
+      
+      // onSwapSuccess is called via onTxConfirmed callback in useUniSwap options
+
+    } catch (err: any) { 
+      // This catch should ideally not be hit if the hook handles errors properly
+      // and calls onTxError. Kept as a fallback.
+      const errorMsg = err.message || 'Swap-ul a eșuat (catch general în componentă)';
       if (onError) onError(errorMsg);
     }
+    // setLoading(false) is handled by the hook now
   };
 
   return (
@@ -160,12 +218,31 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
           {/* Error Display */}
           {error && (
             <div className="bg-red-600/20 border border-red-500 rounded-lg p-3 text-red-200">
-              ❌ {error}
+              ❌ {error} {/* Display error from hook */}
+            </div>
+          )}
+
+          {/* Transaction Status Display - Unified */}
+          {txHash && !swapSuccess && !error && (
+            <div className={`p-3 rounded-lg ${isConfirming ? 'bg-yellow-600/20 border-yellow-500 text-yellow-200' : 'bg-blue-600/20 border-blue-500 text-blue-200'}`}>
+              {isConfirming 
+                ? `⏳ Confirmare tranzacție...` 
+                : `🔗 Tranzacție trimisă! Aștept confirmarea...`}
+              <div className="mt-1">
+                <a 
+                  href={`https://sepolia.etherscan.io/tx/${txHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:underline text-sm"
+                >
+                  Vezi pe Etherscan
+                </a>
+              </div>
             </div>
           )}
 
           {/* Success Display */}
-          {txHash && (
+          {swapSuccess && txHash && (
             <div className="bg-green-600/20 border border-green-500 rounded-lg p-3 text-green-200">
               ✅ Swap reușit!
               <div className="mt-1">
@@ -184,10 +261,10 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
           {/* Swap Button */}
           <button
             onClick={handleSwap}
-            disabled={loading || !ethAmount || parseFloat(ethAmount) <= 0 || parseFloat(ethAmount) > parseFloat(balance)}
+            disabled={loading || isConfirming || !ethAmount || parseFloat(ethAmount) <= 0 || parseFloat(ethAmount) > parseFloat(balance)}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 px-6 py-3 rounded-lg font-semibold transition-all duration-200 disabled:cursor-not-allowed"
           >
-            {loading ? '⏳ Procesez...' : '⚡ Execută Swap'}
+            {loading || isConfirming ? '⏳ Procesez...' : '⚡ Execută Swap'}
           </button>
 
           {/* Reset Button */}

@@ -18,6 +18,7 @@ import SignMessageModal from './components/SignMessageModal';
 import TimestampModal from './components/TimestampModal';
 import VoteModal from './components/VoteModal';
 import SymbolicDonationModal from './components/SymbolicDonationModal';
+import SimpleSwapModal from './components/SimpleSwapModal';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -104,7 +105,8 @@ const EscapeRoom = () => {
   const [showTimestampModal, setShowTimestampModal] = useState(false);
   const [showVoteModal, setShowVoteModal] = useState(false);
   const [showSymbolicDonationModal, setShowSymbolicDonationModal] = useState(false);
-  
+  const [showSimpleSwapModal, setShowSimpleSwapModal] = useState(false);
+
   useEffect(() => {
     localStorage.setItem('cryptoEscapeRoom', JSON.stringify(gameState));
   }, [gameState]);
@@ -395,7 +397,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
     try {
       const signer = getSigner();
       const transferAmount = ethers.utils.parseEther("0.0001"); // Reduced amount for testing
-      const recipientAddress = "0x000000000000000000000000000000000000dEaD";
+      const recipientAddress = "0x000000000000000000000000000000000000dEaD"; // Mock recipient
       const tx = await signer.sendTransaction({
         to: recipientAddress,
         value: transferAmount,
@@ -417,7 +419,36 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
       hideMainTxLoadingModal();
       setIsLoading(false);
     }
-  };// Challenge 6: Simplu ETH → UNI swap (versiunea funcțională)
+  };
+
+  // Challenge 6: Deschide modalul pentru swap simplu
+  const challenge6_OpenSimpleSwapModal = () => {
+    if (!checkMetaMask()) return;
+    setShowSimpleSwapModal(true);
+  };
+
+  // Handler pentru succesul swap-ului din SimpleSwapModal
+  const handleSimpleSwapSuccess = (txHash: string) => {
+    hideMainTxLoadingModal(); // Ascunde modalul general de încărcare dacă era vizibil
+    unlockDrawer(5, "8");
+    setShowSimpleSwapModal(false);
+    alert(`🎉 Sertar 6 deblocat! Ai primit cifra '8' pentru seif!\n    \n🦄 Swap ETH → Token (Simulat) completat cu succes!\n🔗 TX Hash: ${txHash.slice(0, 10)}...`);
+  };
+
+  // Handler pentru eroare în SimpleSwapModal
+  const handleSimpleSwapError = (errorMessage: string) => {
+    hideMainTxLoadingModal(); // Ascunde modalul general de încărcare
+    alert(`❌ Eroare la Swap: ${errorMessage}`);
+    // Considerăm să lăsăm SimpleSwapModal deschis pentru ca utilizatorul să poată reîncerca sau închide manual.
+  };
+
+  // Handler pentru când tranzacția de swap este trimisă (din SimpleSwapModal)
+  const handleSimpleSwapTxSent = (txHash: string) => {
+    showMainTxLoadingModal(txHash); // Afișează modalul general de încărcare
+    // Nu închide SimpleSwapModal aici, lasă-l deschis până la confirmare/eroare
+  };
+
+  /*
   const challenge6_Swap = async () => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
@@ -425,15 +456,12 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
     try {
       const signer = getSigner();
       const swapAmount = ethers.utils.parseEther("0.001"); // 0.001 ETH
+      const uniTokenAddress = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984"; // Adresă reală UNI pe Mainnet, dar folosim Sepolia
       
-      // Adresa UNI token pe Sepolia (folosim o adresă mock pentru demonstrație)
-      const uniTokenAddress = "0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984";
-      
-      // Pentru demonstrație, trimitem ETH la adresa UNI și simulăm swap-ul
       const tx = await signer.sendTransaction({
-        to: uniTokenAddress,
+        to: uniTokenAddress, // Simulează trimiterea către un contract de swap sau token
         value: swapAmount,
-        gasLimit: 21000
+        gasLimit: 21000 // Gas limit standard pentru transfer ETH
       });
       
       showMainTxLoadingModal(tx.hash);
@@ -454,6 +482,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
       setIsLoading(false);
     }
   };
+  */
 
   const challenges = [
     { id: 1, title: "Semnătura Cypherpunk", description: "Semnează manifestul revoluției digitale", icon: FileSignature, action: challenge1_SignMessage, difficulty: "Ușor", reward: "O cifră pentru seif" },
@@ -461,7 +490,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
     { id: 3, title: "Vot Descentralizat (cu ETH)", description: "Votează simbolic trimițând 0.0001 ETH", icon: Vote, action: challenge3_Vote, difficulty: "Mediu", reward: "O cifră pentru seif" },
     { id: 4, title: "Mesajul Secret", description: "Trimite cuvântul 'descentralizare' pe blockchain", icon: Puzzle, action: challenge4_SendMessageToBlockchain, difficulty: "Mediu", reward: "O cifră pentru seif" },
     { id: 5, title: "Abonament Lista Criptată", description: "Donează simbolic pentru abonare la lista de mailing criptată", icon: Send, action: challenge5_Transfer, difficulty: "Ușor", reward: "O cifră pentru seif" },
-    { id: 6, title: "Swap Hibrid (ETH → Token)", description: "Swap ETH → Token folosind 0x (simulat) sau WETH (simplu)", icon: ArrowLeftRight, action: challenge6_Swap, difficulty: "Avansat", reward: "O cifră pentru seif" }
+    { id: 6, title: "Swap ETH → Token (Simplu)", description: "Realizează un swap simulat ETH pentru un token ERC20.", icon: ArrowLeftRight, action: challenge6_OpenSimpleSwapModal, difficulty: "Mediu", reward: "O cifră pentru seif" } // Actualizat aici
   ];
 
   const revealSafeCombination = () => {
@@ -539,13 +568,12 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
                   <span className="text-purple-300 font-medium">🎁 {challenge.reward}</span>
                 </div>
 
-                {!isUnlocked ? (
-                  <button
+                {!isUnlocked ? (                  <button
                     onClick={challenge.action}
                     disabled={isLoading || !userAddress}
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 transform group-hover:scale-105 shadow-md hover:shadow-lg"
                   >
-                    {isLoading && !showSwapModal ? 'Se procesează...' : 'Începe Provocarea'}
+                    {isLoading ? 'Se procesează...' : 'Începe Provocarea'}
                   </button>
                 ) : (
                   <div className="mt-2 text-center bg-green-800 bg-opacity-50 border border-green-600 p-4 rounded-lg">
@@ -619,6 +647,17 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
         onClose={() => setShowSymbolicDonationModal(false)}
         onSubscribe={handleSubscribeToMailingList}
         isLoading={isLoading}
+      />
+
+      <SimpleSwapModal
+        isOpen={showSimpleSwapModal}
+        onClose={() => {
+          setShowSimpleSwapModal(false);
+          hideMainTxLoadingModal(); // Ascunde și modalul de încărcare dacă se închide manual SimpleSwapModal
+        }}
+        onSwapSuccess={handleSimpleSwapSuccess}
+        onError={handleSimpleSwapError}
+        onTxSent={handleSimpleSwapTxSent} // Pasează noul handler
       />
 
       {isTxLoadingModalOpen && (

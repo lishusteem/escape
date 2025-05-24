@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 
 interface SwapQuote {
@@ -8,47 +8,59 @@ interface SwapQuote {
   estimatedGas: string;
 }
 
-export const useUniSwap = () => {
+// Add to hook parameters
+interface UseUniSwapOptions {
+  onTxSent?: (txHash: string) => void;
+  onTxConfirmed?: (txHash: string) => void;
+  onTxError?: (error: any) => void;
+}
+
+export const useUniSwap = (options?: UseUniSwapOptions) => {
   const [quote, setQuote] = useState<SwapQuote | null>(null);
-  const [loading, setLoading] = useState(false); // Va indica încărcarea pentru getQuote și trimiterea inițială a tranzacției
-  const [isConfirming, setIsConfirming] = useState(false); // Noua stare pentru așteptarea confirmării
+  const [loading, setLoading] = useState(false);
+  const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [swapSuccess, setSwapSuccess] = useState(false); // Noua stare pentru succesul final
+  const [swapSuccess, setSwapSuccess] = useState(false);
 
-  // Simple swap rate: 1 ETH = 100 UNI (mock rate for demonstration)
   const SWAP_RATE = 100;
-  const getSwapQuote = async (
+  const getSwapQuote = useCallback(async (
     ethAmount: string,
     signer: ethers.providers.JsonRpcSigner
   ) => {
-    setLoading(true);
-    setError(null);
-
     try {
-      // Validate ETH amount
+      // Validate ethAmount before setting loading to true
+      if (!ethAmount || parseFloat(ethAmount) <= 0) {
+        return null; // Don't proceed to set loading if amount is invalid
+      }
       const ethAmountBN = ethers.utils.parseEther(ethAmount);
-      
-      if (ethAmountBN.lte(0)) {
-        throw new Error('Cantitatea ETH trebuie să fie mai mare decât 0');
+      // This check is redundant if parseFloat is used above, but good for BN comparison
+      if (ethAmountBN.lte(0)) { 
+        return null;
       }
 
-      // Check balance
+      setLoading(true); // Set loading only when we are ready to perform async operations
+      setError(null);   // Clear previous errors
+      setQuote(null);   // Clear previous quote
+
       const balance = await signer.getBalance();
-      const gasEstimate = ethers.utils.parseEther('0.001'); // Estimate gas cost
-      
-      if (balance.lt(ethAmountBN.add(gasEstimate))) {
-        throw new Error('Sold insuficient ETH pentru swap și gas');
+      // A more realistic gas estimation or a fixed higher value might be needed
+      const estimatedGasForTx = ethers.utils.parseUnits("50000", "wei"); // Example gas limit
+      const gasPrice = await signer.getGasPrice();
+      const gasCost = estimatedGasForTx.mul(gasPrice);
+
+      if (balance.lt(ethAmountBN.add(gasCost))) {
+        throw new Error(
+          `Sold insuficient ETH. Necesar: ${ethers.utils.formatEther(ethAmountBN.add(gasCost))} ETH (include gas estimat). Balanță: ${ethers.utils.formatEther(balance)} ETH`
+        );
       }
 
-      // Calculate UNI amount (mock calculation)
       const uniAmount = ethAmountBN.mul(SWAP_RATE);
-      
       const quoteData: SwapQuote = {
         sellAmount: ethAmountBN.toString(),
         buyAmount: uniAmount.toString(),
         rate: SWAP_RATE.toString(),
-        estimatedGas: '21000'
+        estimatedGas: estimatedGasForTx.toString(), // Or a string representation of estimated cost
       };
 
       setQuote(quoteData);
@@ -56,80 +68,94 @@ export const useUniSwap = () => {
     } catch (err: any) {
       const errorMessage = err.message || 'Eșec la obținerea quote-ului';
       setError(errorMessage);
-      throw new Error(errorMessage);
+      // Do not throw here, let the UI handle the error state
+      return null;
     } finally {
       setLoading(false);
     }
-  };
+  }, [SWAP_RATE]); // Dependencies for useCallback
 
-  const executeSwap = async (signer: ethers.providers.JsonRpcSigner) => {
+  const executeSwap = useCallback(async (signer: ethers.providers.JsonRpcSigner) => {
     if (!quote) {
-      throw new Error('Nu există quote disponibil');
+      const errMsg = 'Nu există quote disponibil. Obțineți o cotație întâi.';
+      if (options?.onTxError) options.onTxError({ message: errMsg });
+      setError(errMsg);
+      // throw new Error(errMsg); // Avoid throwing, let UI handle
+      return null;
     }
 
     setLoading(true);
-    setIsConfirming(false); // Resetează starea de confirmare
-    setSwapSuccess(false); // Resetează starea de succes
+    setIsConfirming(false);
+    setSwapSuccess(false);
     setError(null);
-    setTxHash(null); // Resetează hash-ul anterior
+    setTxHash(null);
 
     try {
-      const mockSwapContract = "0x0000000000000000000000000000000000000001";
+      const mockSwapContract = "0x000000000000000000000000000000000000dEaD"; // Using a dead address for mock
       
       const txRequest = {
         to: mockSwapContract,
         value: quote.sellAmount,
       };
 
-      const estimatedGas = await signer.estimateGas(txRequest);
-      
+      // Estimate gas more accurately for the actual transaction if possible
+      // For a simple ETH transfer, this is often 21000, but can vary.
+      // Using a slightly higher limit for safety or the one from quote if it's reliable.
+      const gasLimitForTx = ethers.BigNumber.from(quote.estimatedGas || "25000"); 
+
       console.log("🦄 Trimitere tranzacție UNI swap...");
       const tx = await signer.sendTransaction({
         ...txRequest,
-        gasLimit: estimatedGas
+        gasLimit: gasLimitForTx 
       });
 
-      setTxHash(tx.hash); // Setează hash-ul imediat pentru link-ul Etherscan
-      setLoading(false); // Oprește loading-ul inițial
-      setIsConfirming(true); // Începe starea de confirmare
+      setTxHash(tx.hash);
+      if (options?.onTxSent) {
+        options.onTxSent(tx.hash);
+      }
+      // setLoading(false); // Keep loading true until confirmation or error
+      setIsConfirming(true);
       console.log(`⏳ Aștept confirmarea tranzacției: ${tx.hash}`);
       
-      await tx.wait(); // Așteaptă confirmarea tranzacției
+      await tx.wait(1); // Wait for 1 confirmation
       
-      setIsConfirming(false); // Oprește starea de confirmare
-      setSwapSuccess(true); // Setează succesul final
+      setIsConfirming(false);
+      setSwapSuccess(true);
+      if (options?.onTxConfirmed) {
+        options.onTxConfirmed(tx.hash);
+      }
       console.log(`✅ Tranzacție confirmată: ${tx.hash}`);
-      
-      return tx.hash;
-    } catch (err: any) {
+      setLoading(false); // Stop loading after confirmation
+      return tx.hash;    } catch (err: any) {
       console.error("❌ Eroare la executarea swap-ului UNI:", err);
       const errorMessage = err.reason || err.message || 'Executarea swap-ului a eșuat';
+      if (options?.onTxError) {
+        options.onTxError(err);
+      }
       setError(errorMessage);
       setLoading(false);
       setIsConfirming(false);
       setSwapSuccess(false);
-      // Nu arunca eroarea mai departe dacă vrem să o gestionăm în UI prin starea `error`
-      // throw new Error(errorMessage); 
-      return null; // Returnează null în caz de eroare
+      return null;
     }
-  };
+  }, [quote, options]); // Dependencies for useCallback
 
-  const resetState = () => {
+  const resetState = useCallback(() => {
     setQuote(null);
     setError(null);
     setTxHash(null);
     setLoading(false);
     setIsConfirming(false);
     setSwapSuccess(false);
-  };
+  }, []); // No dependencies needed for resetState
 
   return {
     quote,
     loading,
-    isConfirming, // Exportă noua stare
+    isConfirming,
     error,
     txHash,
-    swapSuccess, // Exportă noua stare
+    swapSuccess,
     getSwapQuote,
     executeSwap,
     resetState
