@@ -16,6 +16,7 @@ import HybridSwapComponent from './components/HybridSwapComponent';
 import TransactionLoadingModal from './components/TransactionLoadingModal';
 import SendSecretMessageModal from './components/SendSecretMessageModal';
 import SignMessageModal from './components/SignMessageModal';
+import TimestampModal from './components/TimestampModal';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -107,9 +108,9 @@ const EscapeRoom = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [showSwapModal, setShowSwapModal] = useState(false);
-  const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);
-  const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);
+  const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);  const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);
   const [showSignMessageModal, setShowSignMessageModal] = useState(false);
+  const [showTimestampModal, setShowTimestampModal] = useState(false);
   
   useEffect(() => {
     localStorage.setItem('cryptoEscapeRoom', JSON.stringify(gameState));
@@ -228,9 +229,8 @@ const EscapeRoom = () => {
 
   const challenge1_SignMessage = async () => {
     setShowSignMessageModal(true);
-  };
-  // Challenge 2: Blockchain Timestamp
-  const challenge2_Timestamp = async () => {
+  };  // Handler pentru TimestampModal
+  const handleCreateTimestamp = async () => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
     try {
@@ -241,11 +241,12 @@ const EscapeRoom = () => {
         to: burnAddress, 
         value: ethers.utils.parseEther("0.000001"), 
         data: ethers.utils.hexlify(ethers.utils.toUtf8Bytes(timestampData)),
-        gasLimit: 50000 // Gas limit adecvat pentru tranzacție cu date mici
+        gasLimit: 50000
       });
       showMainTxLoadingModal(tx.hash);
       await tx.wait();
       unlockDrawer(1, "7");
+      setShowTimestampModal(false);
       alert(`🎉 Sertar 2 deblocat! Ai primit cifra '7' pentru seif!
       
 📝 Timestamp înregistrat pe blockchain!
@@ -257,6 +258,13 @@ const EscapeRoom = () => {
       hideMainTxLoadingModal();
       setIsLoading(false);
     }
+  };
+
+  // Challenge 2: Blockchain Timestamp
+  const challenge2_Timestamp = () => {
+    if (!checkMetaMask()) return;
+    // Open the educational modal instead of direct execution
+    setShowTimestampModal(true);
   };
   // Challenge 3: Vote with LINK
   const challenge3_Vote = async () => {
@@ -519,12 +527,17 @@ const EscapeRoom = () => {
             onClose={() => setShowSwapModal(false)}
             showTxLoadingModal={showMainTxLoadingModal}
             hideTxLoadingModal={hideMainTxLoadingModal}
-          />        </div>      )}
-
-      <SignMessageModal
+          />        </div>      )}      <SignMessageModal
         isOpen={showSignMessageModal}
         onClose={() => setShowSignMessageModal(false)}
         onSignMessage={handleSignMessage}
+        isLoading={isLoading}
+      />
+
+      <TimestampModal
+        isOpen={showTimestampModal}
+        onClose={() => setShowTimestampModal(false)}
+        onCreateTimestamp={handleCreateTimestamp}
         isLoading={isLoading}
       />
 
