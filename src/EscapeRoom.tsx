@@ -10,7 +10,8 @@ import {
   ArrowLeftRight,
   CheckCircle,
   Lock,
-  ExternalLink
+  ExternalLink,
+  HelpCircle
 } from 'lucide-react';
 import TransactionLoadingModal from './components/TransactionLoadingModal';
 import SendSecretMessageModal from './components/SendSecretMessageModal';
@@ -19,6 +20,7 @@ import TimestampModal from './components/TimestampModal';
 import VoteModal from './components/VoteModal';
 import SymbolicDonationModal from './components/SymbolicDonationModal';
 import SimpleSwapModal from './components/SimpleSwapModal';
+import MetaMaskSetupGuide from './components/MetaMaskSetupGuide';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -103,9 +105,9 @@ const EscapeRoom = () => {
   const [userAddress, setUserAddress] = useState('');
   const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);  const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);  const [showSignMessageModal, setShowSignMessageModal] = useState(false);
   const [showTimestampModal, setShowTimestampModal] = useState(false);
-  const [showVoteModal, setShowVoteModal] = useState(false);
-  const [showSymbolicDonationModal, setShowSymbolicDonationModal] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);  const [showSymbolicDonationModal, setShowSymbolicDonationModal] = useState(false);
   const [showSimpleSwapModal, setShowSimpleSwapModal] = useState(false);
+  const [showSetupGuide, setShowSetupGuide] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('cryptoEscapeRoom', JSON.stringify(gameState));
@@ -518,13 +520,19 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
                 👤 Conectat ca: {`${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`}
               </p>
             </div>
-          )}
-          <div className="mt-6">
+          )}          <div className="mt-6 flex justify-center items-center gap-4">
             <button
               onClick={resetGame}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-red-500/50 text-sm"
             >
               🔄 Resetează Progresul
+            </button>
+            <button
+              onClick={() => setShowSetupGuide(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-blue-500/50 text-sm flex items-center gap-2"
+            >
+              <HelpCircle className="h-4 w-4" />
+              Ghid Configurare MetaMask
             </button>
           </div>
         </header>
@@ -647,9 +655,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
         onClose={() => setShowSymbolicDonationModal(false)}
         onSubscribe={handleSubscribeToMailingList}
         isLoading={isLoading}
-      />
-
-      <SimpleSwapModal
+      />      <SimpleSwapModal
         isOpen={showSimpleSwapModal}
         onClose={() => {
           setShowSimpleSwapModal(false);
@@ -658,6 +664,11 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
         onSwapSuccess={handleSimpleSwapSuccess}
         onError={handleSimpleSwapError}
         onTxSent={handleSimpleSwapTxSent} // Pasează noul handler
+      />
+
+      <MetaMaskSetupGuide
+        isOpen={showSetupGuide}
+        onClose={() => setShowSetupGuide(false)}
       />
 
       {isTxLoadingModalOpen && (

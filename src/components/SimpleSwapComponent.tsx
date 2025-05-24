@@ -149,7 +149,7 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
 
   return (
     <div className="simple-swap-container bg-gray-800 rounded-lg p-6 text-white">      <h3 className="text-xl font-bold mb-4 text-center text-cyan-400">
-        🦄 UNI Token Swap
+        🦄 UNI Token Swap (ETH Direct)
       </h3>
 
       {/* Wallet Status */}
@@ -197,20 +197,21 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
                 🦄 Primești UNI:
               </label>
               <div className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-cyan-400 font-mono">
-                {ethAmount ? (parseFloat(ethAmount) * 100).toFixed(2) : '0.00'} UNI
-              </div>
-              <div className="text-xs text-gray-400 mt-1">
-                Rate: 1 ETH = 100 UNI (demonstrație)
+                {quote ? ethers.utils.formatUnits(quote.buyAmount, 18) : loading ? 'Se încarcă...' : '0.00'} UNI
+              </div>              <div className="text-xs text-gray-400 mt-1">
+                {quote ? `Rate: 1 ETH = ${parseFloat(quote.rate).toFixed(2)} UNI (simulat direct)` : 'Introduceți suma pentru cotație'}
               </div>
             </div>
           </div>          {/* Quote Display */}
           {quote && (
-            <div className="bg-gray-700 p-3 rounded-lg">              <div className="text-sm font-medium text-cyan-400 mb-2">📊 Cotație:</div>
+            <div className="bg-gray-700 p-3 rounded-lg">
+              <div className="text-sm font-medium text-cyan-400 mb-2">📊 Cotație Simulată:</div>
               <div className="text-xs space-y-1">
-                <div>ETH In: {ethers.utils.formatEther(quote.sellAmount)}</div>
-                <div>UNI Out: {ethers.utils.formatEther(quote.buyAmount)}</div>
-                <div>Rate: 1 ETH = {quote.rate} UNI</div>
-                <div>Gas estimat: {quote.estimatedGas}</div>
+                <div>💰 ETH In: {ethers.utils.formatEther(quote.sellAmount)}</div>
+                <div>🦄 UNI Out: {ethers.utils.formatUnits(quote.buyAmount, 18)}</div>
+                <div>📊 Rate: 1 ETH = {parseFloat(quote.rate).toFixed(4)} UNI</div>
+                <div>⛽ Gas estimat: {ethers.BigNumber.from(quote.estimatedGas).toString()}</div>
+                <div className="text-gray-400">🔄 Transfer direct ETH</div>
               </div>
             </div>
           )}
@@ -239,12 +240,10 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
                 </a>
               </div>
             </div>
-          )}
-
-          {/* Success Display */}
+          )}          {/* Success Display */}
           {swapSuccess && txHash && (
             <div className="bg-green-600/20 border border-green-500 rounded-lg p-3 text-green-200">
-              ✅ Swap reușit!
+              ✅ Swap ETH direct reușit!
               <div className="mt-1">
                 <a 
                   href={`https://sepolia.etherscan.io/tx/${txHash}`}
@@ -256,15 +255,13 @@ const SimpleSwapComponent: React.FC<SimpleSwapComponentProps> = ({
                 </a>
               </div>
             </div>
-          )}
-
-          {/* Swap Button */}
+          )}          {/* Swap Button */}
           <button
             onClick={handleSwap}
             disabled={loading || isConfirming || !ethAmount || parseFloat(ethAmount) <= 0 || parseFloat(ethAmount) > parseFloat(balance)}
             className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-600 disabled:to-gray-700 px-6 py-3 rounded-lg font-semibold transition-all duration-200 disabled:cursor-not-allowed"
           >
-            {loading || isConfirming ? '⏳ Procesez...' : '⚡ Execută Swap'}
+            {loading || isConfirming ? '⏳ Procesez ETH...' : '⚡ Execută Swap Direct'}
           </button>
 
           {/* Reset Button */}
