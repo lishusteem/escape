@@ -15,6 +15,7 @@ import {
 import HybridSwapComponent from './components/HybridSwapComponent';
 import TransactionLoadingModal from './components/TransactionLoadingModal';
 import SendSecretMessageModal from './components/SendSecretMessageModal';
+import SignMessageModal from './components/SignMessageModal';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -106,9 +107,9 @@ const EscapeRoom = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [showSwapModal, setShowSwapModal] = useState(false);
-  const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);
-  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);
+  const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);
   const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);
+  const [showSignMessageModal, setShowSignMessageModal] = useState(false);
   
   useEffect(() => {
     localStorage.setItem('cryptoEscapeRoom', JSON.stringify(gameState));
@@ -200,15 +201,14 @@ const EscapeRoom = () => {
     setCurrentTxHash(txHash);
     setIsTxLoadingModalOpen(true);
   };
-
   const hideMainTxLoadingModal = () => {
     setIsTxLoadingModalOpen(false);
     setCurrentTxHash(null);
   };
 
-  const challenge1_SignMessage = async () => {
+  // Handler pentru semnarea mesajului
+  const handleSignMessage = async () => {
     if (!checkMetaMask()) return;
-    setIsLoading(true);
     try {
       const message = "Susțin revoluția cypherpunk și libertatea financiară!";
       const signature = await window.ethereum!.request({
@@ -217,14 +217,17 @@ const EscapeRoom = () => {
       });
       if (signature) {
         unlockDrawer(0, "3");
+        setShowSignMessageModal(false);
         alert("🎉 Sertar 1 deblocat! Ai primit cifra '3' pentru seif!");
       }
     } catch (error) {
       console.error('Eroare semnare:', error);
       alert("❌ Eroare la semnarea mesajului. Asigură-te că ai selectat contul corect în MetaMask.");
-    } finally {
-        setIsLoading(false);
     }
+  };
+
+  const challenge1_SignMessage = async () => {
+    setShowSignMessageModal(true);
   };
   // Challenge 2: Blockchain Timestamp
   const challenge2_Timestamp = async () => {
@@ -516,8 +519,14 @@ const EscapeRoom = () => {
             onClose={() => setShowSwapModal(false)}
             showTxLoadingModal={showMainTxLoadingModal}
             hideTxLoadingModal={hideMainTxLoadingModal}
-          />
-        </div>      )}
+          />        </div>      )}
+
+      <SignMessageModal
+        isOpen={showSignMessageModal}
+        onClose={() => setShowSignMessageModal(false)}
+        onSignMessage={handleSignMessage}
+        isLoading={isLoading}
+      />
 
       <SendSecretMessageModal
         isOpen={showSecretMessageModal}
