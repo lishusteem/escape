@@ -17,6 +17,7 @@ import TransactionLoadingModal from './components/TransactionLoadingModal';
 import SendSecretMessageModal from './components/SendSecretMessageModal';
 import SignMessageModal from './components/SignMessageModal';
 import TimestampModal from './components/TimestampModal';
+import VoteModal from './components/VoteModal';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -108,9 +109,9 @@ const EscapeRoom = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [showSwapModal, setShowSwapModal] = useState(false);
-  const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);  const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);
-  const [showSignMessageModal, setShowSignMessageModal] = useState(false);
+  const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);  const [currentTxHash, setCurrentTxHash] = useState<string | null>(null);  const [showSecretMessageModal, setShowSecretMessageModal] = useState(false);  const [showSignMessageModal, setShowSignMessageModal] = useState(false);
   const [showTimestampModal, setShowTimestampModal] = useState(false);
+  const [showVoteModal, setShowVoteModal] = useState(false);
   
   useEffect(() => {
     localStorage.setItem('cryptoEscapeRoom', JSON.stringify(gameState));
@@ -251,9 +252,91 @@ const EscapeRoom = () => {
       
 📝 Timestamp înregistrat pe blockchain!
 🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
-    } catch (error) {
-      console.error('Eroare timestamp:', error);
+    } catch (error) {      console.error('Eroare timestamp:', error);
       alert("❌ Eroare la crearea timestamp-ului. Verifică balanța ETH și rețeaua (Sepolia).");
+    } finally {
+      hideMainTxLoadingModal();
+      setIsLoading(false);
+    }
+  };
+
+  // Handler pentru VoteModal
+  const handleVote = async (voteType: 'NU' | 'DA') => {
+    if (!checkMetaMask()) return;
+    setIsLoading(true);
+    try {
+      const signer = getSigner();
+      const voteAmount = ethers.utils.parseEther("0.000001");
+      
+      // Verifică balanța înainte de tranzacție
+      const balance = await signer.getBalance();
+      const estimatedGasPrice = ethers.utils.parseUnits("20", "gwei");
+      const estimatedGasCost = estimatedGasPrice.mul(21000);
+      const totalCost = voteAmount.add(estimatedGasCost);
+      
+      if (balance.lt(totalCost)) {
+        alert(`❌ Fonduri insuficiente! 
+        
+Ai nevoie de cel puțin ${ethers.utils.formatEther(totalCost)} ETH pentru:
+• Vot: ${ethers.utils.formatEther(voteAmount)} ETH  
+• Gas: ~${ethers.utils.formatEther(estimatedGasCost)} ETH
+• Total: ~${ethers.utils.formatEther(totalCost)} ETH
+
+Balanța ta: ${ethers.utils.formatEther(balance)} ETH
+
+💡 Obține ETH de test de la: https://sepoliafaucet.com`);
+        return;
+      }      // Adresele pentru votare
+      const voteAddresses = {
+        NU: '0x742d35Cc6634C0532925a3b8D5c59009e0c20bba',  // Adresa validă pentru NU
+        DA: '0x000000000000000000000000000000000000dEaD'  // Burn address pentru DA
+      };
+      
+      const votingAddress = voteAddresses[voteType];
+      
+      // Debug logging
+      console.log('Vot Type:', voteType);
+      console.log('Voting Address:', votingAddress);
+      console.log('Vote Amount:', ethers.utils.formatEther(voteAmount));
+        // Verifică dacă adresa este validă
+      if (!ethers.utils.isAddress(votingAddress)) {
+        alert(`❌ Adresa de votare nu este validă: ${votingAddress}`);
+        return;
+      }
+      
+      console.log('Încep tranzacția de votare...');
+      console.log('Signer:', await signer.getAddress());
+      
+      const tx = await signer.sendTransaction({
+        to: votingAddress,
+        value: voteAmount,
+        gasLimit: 21000
+      });
+      
+      console.log('Tranzacție trimisă:', tx.hash);
+      
+      showMainTxLoadingModal(tx.hash);
+      await tx.wait();
+      setShowVoteModal(false);
+      
+      // Doar votul DA deschide sertarul
+      if (voteType === 'DA') {
+        unlockDrawer(2, "1");
+        alert(`🎉 Sertar 3 deblocat! Votul tău "${voteType}" pentru descentralizare a fost înregistrat! Ai primit cifra '1' pentru seif!
+        
+🗳️ Votul a fost trimis la: ${votingAddress.slice(0, 10)}...
+🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
+      } else {
+        alert(`✅ Votul tău "${voteType}" a fost înregistrat pe blockchain!
+        
+🗳️ Votul a fost trimis la: ${votingAddress.slice(0, 10)}...
+🔗 TX Hash: ${tx.hash.slice(0, 10)}...
+        
+❌ Doar votul "DA" deschide sertarul. Poți încerca din nou!`);
+      }
+    } catch (error) {
+      console.error('Eroare vot:', error);
+      alert("❌ Eroare la votare. Verifică balanța ETH și rețeaua (Sepolia).");
     } finally {
       hideMainTxLoadingModal();
       setIsLoading(false);
@@ -265,32 +348,12 @@ const EscapeRoom = () => {
     if (!checkMetaMask()) return;
     // Open the educational modal instead of direct execution
     setShowTimestampModal(true);
-  };
-  // Challenge 3: Vote with LINK
-  const challenge3_Vote = async () => {
+  };  // Challenge 3: Vote with LINK
+  const challenge3_Vote = () => {
     if (!checkMetaMask()) return;
-    setIsLoading(true);
-    try {
-      const signer = getSigner();
-      const voteAmount = ethers.utils.parseEther("0.0001");
-      const votingAddress = "0x000000000000000000000000000000000000dEaD"; // Using a burn address for simplicity
-      const tx = await signer.sendTransaction({
-        to: votingAddress,
-        value: voteAmount,
-        gasLimit: 21000
-      });
-      showMainTxLoadingModal(tx.hash);
-      await tx.wait();
-      unlockDrawer(2, "1");
-      alert("🎉 Sertar 3 deblocat! Votul tău cu ETH a fost înregistrat. Ai primit cifra '1' pentru seif!");
-    } catch (error) {
-      console.error('Eroare vot cu ETH:', error);
-      alert("❌ Eroare la votul cu ETH. Verifică balanța și rețeaua.");
-    } finally {
-      hideMainTxLoadingModal();
-      setIsLoading(false);
-    }
-  };  const challenge4_SendMessageToBlockchain = async () => {
+    // Open the educational modal instead of direct execution
+    setShowVoteModal(true);
+  };const challenge4_SendMessageToBlockchain = async () => {
     if (!checkMetaMask()) return;
     // Deschide modal-ul educațional pentru mesaje secrete
     setShowSecretMessageModal(true);
@@ -532,12 +595,17 @@ const EscapeRoom = () => {
         onClose={() => setShowSignMessageModal(false)}
         onSignMessage={handleSignMessage}
         isLoading={isLoading}
-      />
-
-      <TimestampModal
+      />      <TimestampModal
         isOpen={showTimestampModal}
         onClose={() => setShowTimestampModal(false)}
         onCreateTimestamp={handleCreateTimestamp}
+        isLoading={isLoading}
+      />
+
+      <VoteModal
+        isOpen={showVoteModal}
+        onClose={() => setShowVoteModal(false)}
+        onVote={handleVote}
         isLoading={isLoading}
       />
 
