@@ -520,7 +520,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
                 👤 Conectat ca: {`${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`}
               </p>
             </div>
-          )}          <div className="mt-6 flex justify-center items-center gap-4">
+          )}          <div className="mt-6 flex justify-center items-center gap-4 flex-wrap">
             <button
               onClick={resetGame}
               className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-red-500/50 text-sm"
@@ -533,6 +533,13 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
             >
               <HelpCircle className="h-4 w-4" />
               Ghid Configurare MetaMask
+            </button>
+            <button
+              onClick={() => window.open('/interactive-escape.html', '_blank')}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/50 text-sm flex items-center gap-2"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Pagina Interactivă
             </button>
           </div>
         </header>

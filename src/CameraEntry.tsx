@@ -766,3 +766,4 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
 };
 
 export default CameraEntry;
+

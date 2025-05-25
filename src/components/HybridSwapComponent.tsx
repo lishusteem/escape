@@ -12,7 +12,7 @@ interface HybridSwapComponentProps {
 }
 
 const HybridSwapComponent: React.FC<HybridSwapComponentProps> = ({
-  userAddress,
+  userAddress: _userAddress, // Renamed to indicate it's intentionally unused
   onSwapSuccess,
   onSwapError,
   onClose,

@@ -106,10 +106,8 @@ const EthSwapComponent = () => {
       });
 
       setTxHash(tx.hash);
-      setStatus(`Transaction sent: ${tx.hash.slice(0,10)}...`);
-
-      // Așteaptă confirmarea
-      const receipt = await tx.wait();
+      setStatus(`Transaction sent: ${tx.hash.slice(0,10)}...`);      // Așteaptă confirmarea
+      await tx.wait();
       setStatus('Swap completed successfully!');
       
       // Reset form
@@ -276,9 +274,7 @@ const EthSwapComponent = () => {
             </a>
           </div>
         )}
-      </div>
-
-      <style jsx>{`
+      </div>      <style>{`
         .eth-swap-container {
           max-width: 500px;
           margin: 20px auto;
