@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import CameraEntry from './CameraEntry'
-import EscapeRoom from './EscapeRoom'
+import UnifiedEscapeRoom from './UnifiedEscapeRoom'
 
 function App() {
   const [isEntryComplete, setIsEntryComplete] = useState(false);
@@ -14,7 +14,7 @@ function App() {
       {!isEntryComplete ? (
         <CameraEntry onEntryComplete={handleEntryComplete} />
       ) : (
-        <EscapeRoom />
+        <UnifiedEscapeRoom />
       )}
     </>
   );

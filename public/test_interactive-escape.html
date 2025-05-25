@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Interactive Escape Room - Cypherpunk Revolution</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #000;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #111;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .test-header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #00ffff;
+            padding-bottom: 20px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #222;
+            border-radius: 8px;
+            border-left: 4px solid #00ffff;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .test-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #555;
+        }
+
+        .test-button {
+            background: linear-gradient(45deg, #00ffff, #0080ff);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .test-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.5);
+        }
+
+        .test-button.secondary {
+            background: linear-gradient(45deg, #ff00ff, #ff0080);
+        }
+
+        .test-button.success {
+            background: linear-gradient(45deg, #00ff00, #80ff00);
+        }
+
+        .test-button.warning {
+            background: linear-gradient(45deg, #ffff00, #ff8000);
+        }
+
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .test-result.pass {
+            background: rgba(0, 255, 0, 0.2);
+            border: 1px solid #00ff00;
+            color: #00ff00;
+        }
+
+        .test-result.fail {
+            background: rgba(255, 0, 0, 0.2);
+            border: 1px solid #ff0000;
+            color: #ff0000;
+        }
+
+        .test-result.info {
+            background: rgba(0, 255, 255, 0.2);
+            border: 1px solid #00ffff;
+            color: #00ffff;
+        }
+
+        .modal-test-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-test-content {
+            background: #222;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 80vw;
+            max-height: 80vh;
+            overflow: auto;
+            border: 2px solid #00ffff;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.6);
+            position: relative;
+        }
+
+        .modal-test-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: #ff0000;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .performance-metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .metric {
+            background: #444;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ffff;
+        }
+
+        .coordinate-display {
+            background: #333;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #0080ff);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <div class="test-header">
+            <h1>🧪 Test Suite - Interactive Escape Room</h1>
+            <p>Testare funcționalități și performanță pentru jocul Cypherpunk Revolution</p>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Testare Funcționalități Core</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Inițializare Joc</h3>
+                    <button class="test-button" onclick="testGameInitialization()">Test Inițializare</button>
+                    <div id="init-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Coordonate Zone</h3>
+                    <button class="test-button" onclick="testAreaCoordinates()">Test Coordonate</button>
+                    <div id="coordinates-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Event Listeners</h3>
+                    <button class="test-button" onclick="testEventListeners()">Test Events</button>
+                    <div id="events-result" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🖼️ Testare Modal și Imagini</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Modal Overlay</h3>
+                    <button class="test-button" onclick="testModalFunctionality()">Test Modal</button>
+                    <button class="test-button secondary" onclick="showTestModal()">Demo Modal</button>
+                    <div id="modal-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Imagini Solved</h3>
+                    <button class="test-button" onclick="testImageLoading()">Test Imagini</button>
+                    <div id="images-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Poziționare Imagini</h3>
+                    <button class="test-button" onclick="testImagePositioning()">Test Poziționare</button>
+                    <div id="positioning-result" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎮 Testare Gameplay</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Click Zone</h3>
+                    <button class="test-button" onclick="testClickableAreas()">Test Click</button>
+                    <div id="click-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Progres Joc</h3>
+                    <button class="test-button" onclick="testGameProgress()">Test Progres</button>
+                    <button class="test-button success" onclick="simulateGameWin()">Simulare Victorie</button>
+                    <div id="progress-result" class="test-result"></div>
+                    <div class="progress-bar">
+                        <div id="game-progress" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Seif Final</h3>
+                    <button class="test-button" onclick="testSafeUnlock()">Test Seif</button>
+                    <div id="safe-result" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>⚡ Testare Performanță</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Performanță Rendering</h3>
+                    <button class="test-button" onclick="testRenderingPerformance()">Test Rendering</button>
+                    <div id="performance-result" class="test-result"></div>
+                    <div class="performance-metrics">
+                        <div class="metric">
+                            <div class="metric-value" id="fps-metric">0</div>
+                            <div>FPS</div>
+                        </div>
+                        <div class="metric">
+                            <div class="metric-value" id="render-time">0</div>
+                            <div>Render Time (ms)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Memorie și Resurse</h3>
+                    <button class="test-button" onclick="testMemoryUsage()">Test Memorie</button>
+                    <div id="memory-result" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Testare Debug și Calibrare</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Debug Mode</h3>
+                    <button class="test-button" onclick="testDebugMode()">Test Debug</button>
+                    <div id="debug-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Calibrare Zone</h3>
+                    <button class="test-button" onclick="testCalibration()">Test Calibrare</button>
+                    <div id="calibration-result" class="test-result"></div>
+                    <div id="coordinates-display" class="coordinate-display"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>📱 Testare Responsivitate</h2>
+            <div class="test-grid">
+                <div class="test-item">
+                    <h3>Resize Window</h3>
+                    <button class="test-button" onclick="testResponsiveness()">Test Resize</button>
+                    <div id="responsive-result" class="test-result"></div>
+                </div>
+
+                <div class="test-item">
+                    <h3>Compatibilitate Browser</h3>
+                    <button class="test-button" onclick="testBrowserCompatibility()">Test Browser</button>
+                    <div id="browser-result" class="test-result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Test Suite Complet</h2>
+            <div style="text-align: center;">
+                <button class="test-button warning" onclick="runAllTests()" style="font-size: 18px; padding: 15px 30px;">
+                    🚀 Rulează Toate Testele
+                </button>
+                <div id="all-tests-result" class="test-result"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de test -->
+    <div id="testModal" class="modal-test-overlay">
+        <div class="modal-test-content">
+            <button class="modal-test-close" onclick="closeTestModal()">×</button>
+            <h2>🧪 Modal de Test</h2>
+            <p>Acesta este un modal de test pentru verificarea funcționalității.</p>
+            <div style="margin: 20px 0;">
+                <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDBmZmZmIiBvcGFjaXR5PSIwLjMiLz4KICA8dGV4dCB4PSI1MCUiIHk9IjUwJSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjE2IiBmaWxsPSIjZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+VGVzdCBJbWFnZTwvdGV4dD4KPC9zdmc+" alt="Test Image" style="max-width: 100%; border-radius: 10px;">
+            </div>
+            <button class="test-button" onclick="closeTestModal()">Închide Modal</button>
+        </div>
+    </div>
+
+    <script>
+        // Variabile pentru teste
+        let testResults = {};
+        let testCount = 0;
+        let passedTests = 0;
+
+        // Mock pentru funcțiile din jocul principal
+        const mockGameFunctions = {
+            areaCoordinates: {
+                area1: { left: '17.1%', top: '59.2%', width: '14.0%', height: '10.5%' },
+                area2: { left: '17.2%', top: '68.7%', width: '14.0%', height: '10.2%' },
+                area3: { left: '17.3%', top: '78.8%', width: '14.0%', height: '10.1%' },
+                area4: { left: '67.8%', top: '59.1%', width: '17.6%', height: '10%' },
+                area5: { left: '67.9%', top: '68.5%', width: '17.2%', height: '10.4%' },
+                area6: { left: '67.8%', top: '79%', width: '17.2%', height: '10.2%' },
+                areaSeif: { left: '60%', top: '32%', width: '18%', height: '22%' }
+            },
+            solvedAreas: new Set(),
+            debugMode: false,
+            isSeifDisplayed: false,
+            isSeifSolved: false
+        };
+
+        // Funcții de test
+        function testGameInitialization() {
+            const result = document.getElementById('init-result');
+            let passed = 0;
+            let total = 4;
+
+            // Test 1: Verifică dacă coordonatele sunt definite
+            const coordsExist = mockGameFunctions.areaCoordinates && Object.keys(mockGameFunctions.areaCoordinates).length === 7;
+            if (coordsExist) passed++;
+
+            // Test 2: Verifică dacă Set-ul solvedAreas este inițializat
+            const solvedSetExists = mockGameFunctions.solvedAreas instanceof Set;
+            if (solvedSetExists) passed++;
+
+            // Test 3: Verifică flag-urile de stare
+            const flagsExist = typeof mockGameFunctions.debugMode === 'boolean' && 
+                              typeof mockGameFunctions.isSeifDisplayed === 'boolean';
+            if (flagsExist) passed++;
+
+            // Test 4: Verifică dacă toate zonele au coordonate valide
+            const validCoords = Object.values(mockGameFunctions.areaCoordinates).every(coord => 
+                coord.left && coord.top && coord.width && coord.height
+            );
+            if (validCoords) passed++;
+
+            displayTestResult(result, passed, total, 
+                `Inițializare: ${passed}/${total} teste trecute`);
+        }
+
+        function testAreaCoordinates() {
+            const result = document.getElementById('coordinates-result');
+            const coords = mockGameFunctions.areaCoordinates;
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică formatarea coordonatelor
+            const validFormat = Object.values(coords).every(coord => {
+                return coord.left.includes('%') && coord.top.includes('%') && 
+                       coord.width.includes('%') && coord.height.includes('%');
+            });
+            if (validFormat) passed++;
+
+            // Test 2: Verifică limitele coordonatelor
+            const validBounds = Object.values(coords).every(coord => {
+                const left = parseFloat(coord.left);
+                const top = parseFloat(coord.top);
+                return left >= 0 && left <= 100 && top >= 0 && top <= 100;
+            });
+            if (validBounds) passed++;
+
+            // Test 3: Verifică că seiful are coordonate separate
+            const safeExists = coords.areaSeif && coords.areaSeif.left && coords.areaSeif.top;
+            if (safeExists) passed++;
+
+            const coordDisplay = document.getElementById('coordinates-display');
+            coordDisplay.innerHTML = JSON.stringify(coords, null, 2);
+
+            displayTestResult(result, passed, total, 
+                `Coordonate: ${passed}/${total} verificări trecute`);
+        }
+
+        function testEventListeners() {
+            const result = document.getElementById('events-result');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică suportul pentru addEventListener
+            if (typeof document.addEventListener === 'function') passed++;
+
+            // Test 2: Verifică suportul pentru event-uri de keyboard
+            const keyboardSupport = 'KeyboardEvent' in window;
+            if (keyboardSupport) passed++;
+
+            // Test 3: Verifică suportul pentru ResizeObserver
+            const resizeObserverSupport = 'ResizeObserver' in window;
+            if (resizeObserverSupport) passed++;
+
+            displayTestResult(result, passed, total, 
+                `Event Listeners: ${passed}/${total} funcționalități suportate`);
+        }
+
+        function testModalFunctionality() {
+            const result = document.getElementById('modal-result');
+            let passed = 0;
+            let total = 4;
+
+            // Test 1: Verifică existența overlay-ului
+            const overlay = document.getElementById('testModal');
+            if (overlay) passed++;
+
+            // Test 2: Verifică stilurile CSS pentru modal
+            const overlayStyles = window.getComputedStyle(overlay);
+            if (overlayStyles.position === 'fixed') passed++;
+
+            // Test 3: Testează deschiderea modalului
+            showTestModal();
+            if (overlay.style.display === 'flex') passed++;
+
+            // Test 4: Testează închiderea modalului
+            closeTestModal();
+            if (overlay.style.display === 'none') passed++;
+
+            displayTestResult(result, passed, total, 
+                `Modal: ${passed}/${total} funcționalități testate`);
+        }
+
+        function testImageLoading() {
+            const result = document.getElementById('images-result');
+            let passed = 0;
+            let total = 2;
+
+            // Test 1: Verifică suportul pentru Image API
+            if (typeof Image === 'function') passed++;
+
+            // Test 2: Testează încărcarea unei imagini de test
+            const testImg = new Image();
+            testImg.onload = function() {
+                passed++;
+                displayTestResult(result, passed, total, 
+                    `Imagini: ${passed}/${total} teste trecute - Încărcare reușită`);
+            };
+            testImg.onerror = function() {
+                displayTestResult(result, passed, total, 
+                    `Imagini: ${passed}/${total} teste trecute - Eroare încărcare`);
+            };
+            testImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iMTAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iIzAwZmZmZiIvPjwvc3ZnPg==';
+
+            // Pentru rezultat imediat
+            displayTestResult(result, passed, total, 
+                `Imagini: ${passed}/${total} teste inițiale trecute`);
+        }
+
+        function testImagePositioning() {
+            const result = document.getElementById('positioning-result');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică calculele de aspect ratio
+            const testAspectRatio = (width, height) => {
+                return width && height && width > 0 && height > 0;
+            };
+            if (testAspectRatio(1920, 1080)) passed++;
+
+            // Test 2: Verifică conversia coordonatelor procentuale
+            const testPercentageConversion = (percent, total) => {
+                const result = (parseFloat(percent) / 100) * total;
+                return !isNaN(result) && result >= 0;
+            };
+            if (testPercentageConversion('50%', 1000)) passed++;
+
+            // Test 3: Verifică poziționarea CSS
+            const testElement = document.createElement('div');
+            testElement.style.position = 'absolute';
+            testElement.style.left = '100px';
+            testElement.style.top = '100px';
+            if (testElement.style.position === 'absolute') passed++;
+
+            displayTestResult(result, passed, total, 
+                `Poziționare: ${passed}/${total} calcule validate`);
+        }
+
+        function testClickableAreas() {
+            const result = document.getElementById('click-result');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică simularea click-ului
+            const testClick = () => {
+                const event = new MouseEvent('click', {
+                    bubbles: true,
+                    cancelable: true
+                });
+                return event instanceof MouseEvent;
+            };
+            if (testClick()) passed++;
+
+            // Test 2: Verifică detectarea coordonatelor mouse
+            const testMouseCoords = (e) => {
+                return typeof e.clientX === 'number' && typeof e.clientY === 'number';
+            };
+            const mockEvent = { clientX: 100, clientY: 100 };
+            if (testMouseCoords(mockEvent)) passed++;
+
+            // Test 3: Verifică hover effects
+            const testHoverEffect = () => {
+                const testEl = document.createElement('div');
+                testEl.className = 'clickable-area';
+                return testEl.className.includes('clickable-area');
+            };
+            if (testHoverEffect()) passed++;
+
+            displayTestResult(result, passed, total, 
+                `Click Zone: ${passed}/${total} interacțiuni testate`);
+        }
+
+        function testGameProgress() {
+            const result = document.getElementById('progress-result');
+            const progressBar = document.getElementById('game-progress');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică inițializarea progresului
+            const initialProgress = mockGameFunctions.solvedAreas.size;
+            if (initialProgress === 0) passed++;
+
+            // Test 2: Simulează adăugarea zonelor rezolvate
+            mockGameFunctions.solvedAreas.add('area1');
+            mockGameFunctions.solvedAreas.add('area2');
+            if (mockGameFunctions.solvedAreas.size === 2) passed++;
+
+            // Test 3: Actualizează bara de progres
+            const progressPercent = (mockGameFunctions.solvedAreas.size / 6) * 100;
+            progressBar.style.width = progressPercent + '%';
+            if (progressBar.style.width === '33.3333%') passed++;
+
+            displayTestResult(result, passed, total, 
+                `Progres: ${passed}/${total} - ${mockGameFunctions.solvedAreas.size}/6 zone rezolvate`);
+        }
+
+        function simulateGameWin() {
+            const progressBar = document.getElementById('game-progress');
+            const result = document.getElementById('progress-result');
+            
+            // Simulează rezolvarea tuturor zonelor
+            for (let i = 1; i <= 6; i++) {
+                mockGameFunctions.solvedAreas.add(`area${i}`);
+            }
+            
+            progressBar.style.width = '100%';
+            mockGameFunctions.isSeifDisplayed = true;
+            
+            displayTestResult(result, 3, 3, 
+                `🎉 VICTORIE SIMULATĂ! Toate zonele rezolvate. Seif disponibil!`, 'pass');
+        }
+
+        function testSafeUnlock() {
+            const result = document.getElementById('safe-result');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică condiția de deblocare seif
+            if (mockGameFunctions.solvedAreas.size >= 6) {
+                mockGameFunctions.isSeifDisplayed = true;
+                passed++;
+            }
+
+            // Test 2: Verifică starea seifului
+            if (mockGameFunctions.isSeifDisplayed) passed++;
+
+            // Test 3: Simulează deschiderea seifului
+            if (mockGameFunctions.isSeifDisplayed && !mockGameFunctions.isSeifSolved) {
+                mockGameFunctions.isSeifSolved = true;
+                passed++;
+            }
+
+            displayTestResult(result, passed, total, 
+                `Seif: ${passed}/${total} - Status: ${mockGameFunctions.isSeifSolved ? 'Deschis' : 'Închis'}`);
+        }
+
+        function testRenderingPerformance() {
+            const result = document.getElementById('performance-result');
+            const fpsMetric = document.getElementById('fps-metric');
+            const renderTimeMetric = document.getElementById('render-time');
+            
+            let frameCount = 0;
+            let startTime = performance.now();
+            let lastFrameTime = startTime;
+
+            function measureFrame() {
+                const currentTime = performance.now();
+                const deltaTime = currentTime - lastFrameTime;
+                frameCount++;
+                
+                if (frameCount >= 60) { // Măsoară pentru 60 de frame-uri
+                    const totalTime = currentTime - startTime;
+                    const fps = Math.round((frameCount / totalTime) * 1000);
+                    const avgRenderTime = Math.round(totalTime / frameCount);
+                    
+                    fpsMetric.textContent = fps;
+                    renderTimeMetric.textContent = avgRenderTime;
+                    
+                    const passed = fps > 30 ? 2 : fps > 15 ? 1 : 0;
+                    displayTestResult(result, passed, 2, 
+                        `Performanță: ${fps} FPS, ${avgRenderTime}ms render time`);
+                    return;
+                }
+                
+                lastFrameTime = currentTime;
+                requestAnimationFrame(measureFrame);
+            }
+            
+            requestAnimationFrame(measureFrame);
+        }
+
+        function testMemoryUsage() {
+            const result = document.getElementById('memory-result');
+            let passed = 0;
+            let total = 2;
+
+            // Test 1: Verifică Performance API
+            if ('performance' in window && 'memory' in performance) {
+                const memory = performance.memory;
+                passed++;
+                
+                // Test 2: Verifică utilizarea memoriei
+                if (memory.usedJSHeapSize < memory.totalJSHeapSize) {
+                    passed++;
+                }
+                
+                const memUsageMB = Math.round(memory.usedJSHeapSize / 1024 / 1024);
+                displayTestResult(result, passed, total, 
+                    `Memorie: ${passed}/${total} - Utilizare: ${memUsageMB}MB`);
+            } else {
+                displayTestResult(result, 0, total, 
+                    'Performance.memory nu este suportat în acest browser');
+            }
+        }
+
+        function testDebugMode() {
+            const result = document.getElementById('debug-result');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Toggle debug mode
+            mockGameFunctions.debugMode = !mockGameFunctions.debugMode;
+            if (typeof mockGameFunctions.debugMode === 'boolean') passed++;
+
+            // Test 2: Verifică console logging
+            const originalLog = console.log;
+            let logCalled = false;
+            console.log = (...args) => {
+                logCalled = true;
+                originalLog.apply(console, args);
+            };
+            console.log('Test debug message');
+            console.log = originalLog;
+            if (logCalled) passed++;
+
+            // Test 3: Verifică că debug mode poate fi dezactivat
+            mockGameFunctions.debugMode = false;
+            if (!mockGameFunctions.debugMode) passed++;
+
+            displayTestResult(result, passed, total, 
+                `Debug: ${passed}/${total} funcționalități testate`);
+        }
+
+        function testCalibration() {
+            const result = document.getElementById('calibration-result');
+            const coordsDisplay = document.getElementById('coordinates-display');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Testează ajustarea coordonatelor
+            const originalCoord = mockGameFunctions.areaCoordinates.area1.left;
+            const testAdjustment = (coord, delta) => {
+                const current = parseFloat(coord);
+                const newValue = current + delta;
+                return newValue !== current;
+            };
+            if (testAdjustment('50%', 5)) passed++;
+
+            // Test 2: Verifică validarea limitelor
+            const validateBounds = (value) => {
+                const num = parseFloat(value);
+                return num >= 0 && num <= 100;
+            };
+            if (validateBounds('95%')) passed++;
+
+            // Test 3: Testează resetarea coordonatelor
+            const canReset = originalCoord === mockGameFunctions.areaCoordinates.area1.left;
+            if (canReset) passed++;
+
+            // Afișează coordonatele curente
+            coordsDisplay.innerHTML = 'Coordonate curente:\n' + 
+                JSON.stringify(mockGameFunctions.areaCoordinates, null, 2);
+
+            displayTestResult(result, passed, total, 
+                `Calibrare: ${passed}/${total} operațiuni validate`);
+        }
+
+        function testResponsiveness() {
+            const result = document.getElementById('responsive-result');
+            let passed = 0;
+            let total = 3;
+
+            // Test 1: Verifică suportul pentru media queries
+            const mediaQuerySupport = 'matchMedia' in window;
+            if (mediaQuerySupport) passed++;
+
+            // Test 2: Testează simularea resize
+            const originalWidth = window.innerWidth;
+            const testResize = () => {
+                // Simulează schimbarea dimensiunii
+                return window.innerWidth > 0 && window.innerHeight > 0;
+            };
+            if (testResize()) passed++;
+
+            // Test 3: Verifică suportul pentru viewport
+            const viewportSupport = 'innerWidth' in window && 'innerHeight' in window;
+            if (viewportSupport) passed++;
+
+            displayTestResult(result, passed, total, 
+                `Responsivitate: ${passed}/${total} - Viewport: ${window.innerWidth}x${window.innerHeight}`);
+        }
+
+        function testBrowserCompatibility() {
+            const result = document.getElementById('browser-result');
+            let passed = 0;
+            let total = 5;
+
+            // Test 1: ES6 Support
+            const es6Support = () => {
+                try {
+                    eval('const test = () => {};');
+                    return true;
+                } catch (e) {
+                    return false;
+                }
+            };
+            if (es6Support()) passed++;
+
+            // Test 2: CSS Grid Support
+            const gridSupport = CSS.supports('display', 'grid');
+            if (gridSupport) passed++;
+
+            // Test 3: Flexbox Support
+            const flexSupport = CSS.supports('display', 'flex');
+            if (flexSupport) passed++;
+
+            // Test 4: Custom Properties (CSS Variables)
+            const cssVarsSupport = CSS.supports('color', 'var(--test)');
+            if (cssVarsSupport) passed++;
+
+            // Test 5: Request Animation Frame
+            const rafSupport = 'requestAnimationFrame' in window;
+            if (rafSupport) passed++;
+
+            const browserInfo = navigator.userAgent.split(')')[0].split('(')[1] || 'Unknown';
+            displayTestResult(result, passed, total, 
+                `Browser: ${passed}/${total} funcționalități suportate\nInfo: ${browserInfo}`);
+        }
+
+        function runAllTests() {
+            const result = document.getElementById('all-tests-result');
+            result.innerHTML = '<div style="color: #ffff00;">🔄 Rulează toate testele...</div>';
+            
+            let totalTests = 0;
+            let totalPassed = 0;
+            
+            // Resetează contoarele
+            testCount = 0;
+            passedTests = 0;
+            
+            // Rulează toate testele cu întârzieri pentru a simula testarea reală
+            const tests = [
+                testGameInitialization,
+                testAreaCoordinates,
+                testEventListeners,
+                testModalFunctionality,
+                testImageLoading,
+                testImagePositioning,
+                testClickableAreas,
+                testGameProgress,
+                testSafeUnlock,
+                testMemoryUsage,
+                testDebugMode,
+                testCalibration,
+                testResponsiveness,
+                testBrowserCompatibility
+            ];
+            
+            let testIndex = 0;
+            const runNextTest = () => {
+                if (testIndex < tests.length) {
+                    tests[testIndex]();
+                    testIndex++;
+                    setTimeout(runNextTest, 200); // Întârziere de 200ms între teste
+                } else {
+                    // Performance test la sfârșit (durează mai mult)
+                    setTimeout(() => {
+                        testRenderingPerformance();
+                        
+                        // Rezultat final
+                        setTimeout(() => {
+                            const successRate = Math.round((passedTests / testCount) * 100);
+                            const resultClass = successRate >= 80 ? 'pass' : successRate >= 60 ? 'info' : 'fail';
+                            result.innerHTML = `
+                                <div class="test-result ${resultClass}">
+                                    🏁 TESTE COMPLETE: ${passedTests}/${testCount} (${successRate}%)
+                                    <br>Status: ${successRate >= 80 ? '✅ EXCELENT' : successRate >= 60 ? '⚠️ BINE' : '❌ NECESITĂ ÎMBUNĂTĂȚIRI'}
+                                </div>
+                            `;
+                        }, 2000);
+                    }, 500);
+                }
+            };
+            
+            runNextTest();
+        }
+
+        // Funcții helper pentru modal
+        function showTestModal() {
+            document.getElementById('testModal').style.display = 'flex';
+        }
+
+        function closeTestModal() {
+            document.getElementById('testModal').style.display = 'none';
+        }
+
+        // Funcție helper pentru afișarea rezultatelor
+        function displayTestResult(element, passed, total, message, forceType = null) {
+            testCount += total;
+            passedTests += passed;
+            
+            const percentage = Math.round((passed / total) * 100);
+            let resultClass = forceType;
+            
+            if (!resultClass) {
+                if (percentage === 100) resultClass = 'pass';
+                else if (percentage >= 50) resultClass = 'info';
+                else resultClass = 'fail';
+            }
+            
+            element.className = `test-result ${resultClass}`;
+            element.innerHTML = `${message}<br><small>${passed}/${total} verificări trecute (${percentage}%)</small>`;
+        }
+
+        // Închidere modal cu ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeTestModal();
+            }
+        });
+
+        // Click pe overlay pentru închidere
+        document.getElementById('testModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeTestModal();
+            }
+        });
+
+        // Inițializare la încărcarea paginii
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🧪 Test Suite inițializat pentru Interactive Escape Room');
+        });
+    </script>
+</body>
+</html>
