@@ -231,53 +231,178 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
     }
   ];
   return (
-    <>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex">
-        {/* Main Content Area */}
-        <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-4xl w-full">
-            {/* Header */}
-            <div className="text-center mb-12">
-              <Shield className="h-20 w-20 text-blue-400 mx-auto mb-6" />
-              <h1 className="text-4xl font-bold text-white mb-4">
-                Ghid Setup: Camera Secretă Crypto
-              </h1>
-              <p className="text-xl text-gray-300 mb-6">
-                Pregătește-te pentru aventura în lumea crypto a lui Satoshi Nakamoto
-              </p>
-              <div className="bg-blue-900 border border-blue-700 rounded-lg p-4 inline-block">
-                <p className="text-blue-200 text-sm">
-                  💡 Urmează pașii de mai jos pentru a accesa camera secretă
-                </p>
+    <>      <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-purple-900 to-blue-950 flex">
+        {/* Fixed Progress Sidebar */}
+        <div className="w-80 bg-gray-900/95 backdrop-blur border-r border-gray-700 fixed left-0 top-0 h-screen overflow-y-auto z-10">
+          <div className="p-6">
+            <h3 className="text-xl font-bold text-white mb-6 flex items-center">
+              <Info className="h-6 w-6 mr-2 text-cyan-400" />
+              Progres Educațional
+            </h3>
+            
+            {/* Educational Progress Steps */}
+            <div className="space-y-4">
+              {steps.map((step) => {
+                const Icon = step.icon;
+                return (
+                  <div
+                    key={step.id}
+                    className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                      step.status === 'completed' 
+                        ? 'bg-gradient-to-r from-emerald-900/80 to-green-900/80 border-emerald-500 shadow-lg shadow-emerald-500/20' 
+                        : step.status === 'loading'
+                        ? 'bg-gradient-to-r from-blue-900/80 to-cyan-900/80 border-cyan-500 shadow-lg shadow-cyan-500/20'
+                        : currentStep === step.id
+                        ? 'bg-gradient-to-r from-blue-900/80 to-purple-900/80 border-blue-500 shadow-lg shadow-blue-500/20'
+                        : 'bg-gray-800/60 border-gray-600 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className={`p-3 rounded-full transition-all duration-300 ${
+                        step.status === 'completed' 
+                          ? 'bg-emerald-600 shadow-lg shadow-emerald-500/30' 
+                          : step.status === 'loading'
+                          ? 'bg-cyan-600 shadow-lg shadow-cyan-500/30'
+                          : currentStep === step.id
+                          ? 'bg-blue-600 shadow-lg shadow-blue-500/30'
+                          : 'bg-gray-600'
+                      }`}>
+                        {step.status === 'loading' ? (
+                          <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : step.status === 'completed' ? (
+                          <CheckCircle className="h-6 w-6 text-white" />
+                        ) : (
+                          <Icon className="h-6 w-6 text-white" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className={`font-bold text-sm ${
+                          step.status === 'completed' ? 'text-emerald-200' : 'text-white'
+                        }`}>
+                          {step.title}
+                        </h4>
+                        <p className={`text-xs ${
+                          step.status === 'completed' ? 'text-emerald-300' : 'text-gray-400'
+                        }`}>
+                          {step.description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Educational Progress Summary */}
+            <div className="mt-8 p-4 bg-gradient-to-r from-gray-800/80 to-gray-700/80 rounded-xl border border-gray-600">
+              <h4 className="font-bold text-white mb-4 flex items-center">
+                <CheckCircle className="h-5 w-5 mr-2 text-cyan-400" />
+                Rezumat Progres
+              </h4>
+              <div className="space-y-3 text-sm">
+                <div className="flex justify-between items-center p-2 rounded-lg bg-gray-800/50">
+                  <span className="text-gray-300 font-medium">MetaMask:</span>
+                  <span className={`font-bold ${window.ethereum ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {window.ethereum ? '✅ Instalat' : '❌ Lipsește'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-gray-800/50">
+                  <span className="text-gray-300 font-medium">Portofel:</span>
+                  <span className={`font-bold ${connectionStatus.wallet === 'connected' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {connectionStatus.wallet === 'connected' ? '✅ Conectat' : '❌ Deconectat'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-gray-800/50">
+                  <span className="text-gray-300 font-medium">Rețea:</span>
+                  <span className={`font-bold ${connectionStatus.network === 'correct' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {connectionStatus.network === 'correct' ? '✅ Sepolia' : '❌ Greșită'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center p-2 rounded-lg bg-gray-800/50">
+                  <span className="text-gray-300 font-medium">ETH:</span>
+                  <span className={`font-bold ${connectionStatus.balance === 'sufficient' ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {connectionStatus.balance === 'sufficient' ? '✅ Suficient' : '❌ Insuficient'}
+                  </span>
+                </div>
               </div>
             </div>
 
-            {/* Main Setup Content */}
-            <div className="space-y-8">
-              {/* Step 1: Install MetaMask */}
-              <div className={`bg-gray-800 rounded-xl border-2 transition-all ${
-                currentStep === 1 ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-20' : 'border-gray-700'
+            {/* Educational Tips */}
+            <div className="mt-6 p-4 bg-gradient-to-r from-cyan-900/50 to-blue-900/50 rounded-xl border border-cyan-600/50">
+              <h4 className="font-bold text-cyan-200 mb-2 flex items-center">
+                <Shield className="h-4 w-4 mr-2" />
+                💡 Sfat Educativ
+              </h4>
+              <p className="text-cyan-300 text-xs leading-relaxed">
+                Această aventură te învață fundamentele blockchain-ului Ethereum într-un mod practic și sigur.
+              </p>
+            </div>
+          </div>
+        </div>        {/* Main Content Area - using full width */}
+        <div className="flex-1 ml-80 p-8">
+          <div className="w-full">
+            {/* Enhanced Educational Header */}
+            <div className="text-center mb-12">
+              <div className="relative">
+                <Shield className="h-24 w-24 text-cyan-400 mx-auto mb-6 drop-shadow-lg filter" />
+                <div className="absolute inset-0 h-24 w-24 mx-auto animate-pulse bg-cyan-400/20 rounded-full blur-xl"></div>
+              </div>
+              <h1 className="text-5xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-4">
+                🎓 Ghid Educativ: Blockchain Setup
+              </h1>
+              <p className="text-xl text-gray-300 mb-6 leading-relaxed">
+                Învață fundamentele crypto prin practică: conectarea la MetaMask și rețeaua Sepolia
+              </p>
+              <div className="bg-gradient-to-r from-cyan-900/80 to-blue-900/80 border border-cyan-700 rounded-xl p-6 inline-block backdrop-blur">
+                <p className="text-cyan-200 font-medium">
+                  🚀 <strong>Misiune Educativă:</strong> Parcurge cei 5 pași pentru a învăța să folosești blockchain-ul Ethereum
+                </p>
+                <p className="text-cyan-300 text-sm mt-2">
+                  📚 Fiecare pas îți va explica concepte importante din lumea crypto
+                </p>
+              </div>
+            </div>            {/* Educational Setup Content */}
+            <div className="space-y-8 w-full">
+              {/* Step 1: Install MetaMask - Enhanced Educational */}
+              <div className={`w-full bg-gradient-to-r from-gray-800/90 to-gray-700/90 rounded-2xl border-2 transition-all duration-300 backdrop-blur ${
+                currentStep === 1 ? 'border-cyan-500 ring-2 ring-cyan-500 ring-opacity-30 shadow-xl shadow-cyan-500/20' : 'border-gray-600 hover:border-gray-500'
               }`}>
                 <div className="p-8">
                   <div className="flex items-center mb-6">
-                    <div className="bg-blue-600 p-3 rounded-full mr-4">
+                    <div className="bg-gradient-to-r from-blue-600 to-cyan-600 p-4 rounded-full mr-4 shadow-lg">
                       <Download className="h-8 w-8 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">1. Instalează MetaMask</h2>
-                      <p className="text-gray-400">Portofelul digital pentru blockchain Ethereum</p>
+                      <h2 className="text-3xl font-bold text-white mb-2">📱 Pasul 1: Instalează MetaMask</h2>
+                      <p className="text-gray-300 text-lg">Primul pas în lumea crypto: portofelul digital pentru Ethereum</p>
+                      <div className="mt-2 px-3 py-1 bg-blue-600/20 rounded-full inline-block">
+                        <span className="text-blue-300 text-sm font-medium">🎯 Concept: Portofele Crypto</span>
+                      </div>
                     </div>
                   </div>
 
                   {!window.ethereum ? (
-                    <div className="space-y-4">
-                      <div className="bg-red-900 border border-red-700 rounded-lg p-4">
-                        <p className="text-red-200 mb-4">
-                          🚫 MetaMask nu este detectat în browser-ul tău.
-                        </p>
+                    <div className="space-y-6">
+                      <div className="bg-gradient-to-r from-red-900/80 to-pink-900/80 border border-red-600 rounded-xl p-6">
+                        <h4 className="text-red-200 font-bold mb-4 flex items-center">
+                          🚫 MetaMask nu este detectat în browser
+                        </h4>
+                        <div className="bg-red-800/50 p-4 rounded-lg mb-4">
+                          <h5 className="text-red-300 font-semibold mb-2">📚 Ce este MetaMask?</h5>
+                          <p className="text-red-200 text-sm leading-relaxed mb-3">
+                            MetaMask este o extensie de browser care funcționează ca un portofel digital pentru criptomonede. 
+                            Este ca un cont bancar, dar pentru blockchain-ul Ethereum.
+                          </p>
+                          <div className="bg-red-700/50 p-3 rounded">
+                            <p className="text-red-200 text-xs">
+                              💡 <strong>De reținut:</strong> MetaMask îți permite să interacționezi cu aplicații descentralizate (dApps) 
+                              și să gestionezi criptomonede în siguranță.
+                            </p>
+                          </div>
+                        </div>
                         <div className="space-y-3">
-                          <p className="text-red-300 font-semibold">Cum să instalezi MetaMask:</p>
-                          <ol className="list-decimal list-inside space-y-2 text-red-200 text-sm">
+                          <p className="text-red-300 font-semibold">🔧 Pași pentru instalare:</p>
+                          <ol className="list-decimal list-inside space-y-2 text-red-200 text-sm bg-red-800/30 p-4 rounded-lg">
                             <li>Mergi la site-ul oficial MetaMask</li>
                             <li>Descarcă extensia pentru browser-ul tău</li>
                             <li>Instalează extensia și urmează instrucțiunile</li>
@@ -288,26 +413,30 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
                         </div>
                         <button
                           onClick={() => window.open('https://metamask.io/download/', '_blank')}
-                          className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors inline-flex items-center space-x-2"
+                          className="mt-6 bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white px-8 py-4 rounded-xl transition-all duration-300 inline-flex items-center space-x-3 font-bold shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
-                          <ExternalLink className="h-5 w-5" />
-                          <span>Descarcă MetaMask</span>
+                          <ExternalLink className="h-6 w-6" />
+                          <span>🚀 Descarcă MetaMask</span>
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="bg-green-900 border border-green-700 rounded-lg p-4">
+                    <div className="bg-gradient-to-r from-emerald-900/80 to-green-900/80 border border-emerald-600 rounded-xl p-6">
                       <div className="flex items-center">
-                        <CheckCircle className="h-6 w-6 text-green-400 mr-3" />
-                        <p className="text-green-200">
-                          ✅ MetaMask este instalat! Poți trece la pasul următor.
-                        </p>
+                        <CheckCircle className="h-8 w-8 text-emerald-400 mr-4" />
+                        <div>
+                          <p className="text-emerald-200 font-bold text-lg">
+                            🎉 Excelent! MetaMask este instalat!
+                          </p>
+                          <p className="text-emerald-300 text-sm mt-1">
+                            Ai completat primul pas în învățarea blockchain-ului. Poți trece la configurarea portofelului.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   )}
-                </div>
-              </div>              {/* Step 2: Create Wallet */}
-              <div className={`bg-gray-800 rounded-xl border-2 transition-all ${
+                </div>              </div>{/* Step 2: Create Wallet */}
+              <div className={`w-full bg-gray-800 rounded-xl border-2 transition-all ${
                 currentStep === 2 ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-20' : 'border-gray-700'
               }`}>
                 <div className="p-8">
@@ -378,10 +507,8 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
                     )}
                   </div>
                 </div>
-              </div>
-
-              {/* Step 3: Connect Wallet */}
-              <div className={`bg-gray-800 rounded-xl border-2 transition-all ${
+              </div>              {/* Step 3: Connect Wallet */}
+              <div className={`w-full bg-gray-800 rounded-xl border-2 transition-all ${
                 currentStep === 3 ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-20' : 'border-gray-700'
               }`}>
                 <div className="p-8">
@@ -451,9 +578,8 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
                       </button>
                     </div>
                   )}
-                </div>
-              </div>              {/* Step 4: Switch to Sepolia */}
-              <div className={`bg-gray-800 rounded-xl border-2 transition-all ${
+                </div>              </div>              {/* Step 4: Switch to Sepolia */}
+              <div className={`w-full bg-gray-800 rounded-xl border-2 transition-all ${
                 currentStep === 4 ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-20' : 'border-gray-700'
               }`}>
                 <div className="p-8">
@@ -511,9 +637,8 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
                       </button>
                     </div>
                   )}
-                </div>
-              </div>              {/* Step 5: Get Test ETH */}
-              <div className={`bg-gray-800 rounded-xl border-2 transition-all ${
+                </div>              </div>              {/* Step 5: Get Test ETH */}
+              <div className={`w-full bg-gray-800 rounded-xl border-2 transition-all ${
                 currentStep === 5 ? 'border-blue-500 ring-2 ring-blue-500 ring-opacity-20' : 'border-gray-700'
               }`}>
                 <div className="p-8">
@@ -615,11 +740,9 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Ready to Enter */}
+              </div>              {/* Ready to Enter */}
               {connectionStatus.ready && (
-                <div className="bg-gradient-to-r from-emerald-900 to-blue-900 border-2 border-emerald-500 rounded-xl p-8 text-center">
+                <div className="w-full bg-gradient-to-r from-emerald-900 to-blue-900 border-2 border-emerald-500 rounded-xl p-8 text-center">
                   <div className="mb-6">
                     <CheckCircle className="h-16 w-16 text-emerald-400 mx-auto mb-4" />
                     <h2 className="text-3xl font-bold text-white mb-2">🎉 Gata de Aventură!</h2>
@@ -636,101 +759,8 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Status Sidebar */}
-        <div className="w-80 bg-gray-800 border-l border-gray-700 p-6">
-          <div className="sticky top-6">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center">
-              <Info className="h-6 w-6 mr-2 text-blue-400" />
-              Status Progres
-            </h3>
-            <div className="space-y-4">
-              {steps.map((step) => {
-                const Icon = step.icon;
-                return (
-                  <div
-                    key={step.id}
-                    className={`p-4 rounded-lg border-2 transition-all ${
-                      step.status === 'completed' 
-                        ? 'bg-green-900 border-green-500' 
-                        : step.status === 'loading'
-                        ? 'bg-blue-900 border-blue-500'
-                        : currentStep === step.id
-                        ? 'bg-blue-900 border-blue-500'
-                        : 'bg-gray-700 border-gray-600'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-full ${
-                        step.status === 'completed' 
-                          ? 'bg-green-600' 
-                          : step.status === 'loading'
-                          ? 'bg-blue-600'
-                          : currentStep === step.id
-                          ? 'bg-blue-600'
-                          : 'bg-gray-600'
-                      }`}>
-                        {step.status === 'loading' ? (
-                          <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        ) : step.status === 'completed' ? (
-                          <CheckCircle className="h-5 w-5 text-white" />
-                        ) : (
-                          <Icon className="h-5 w-5 text-white" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className={`font-semibold ${
-                          step.status === 'completed' ? 'text-green-200' : 'text-white'
-                        }`}>
-                          {step.title}
-                        </h4>
-                        <p className={`text-sm ${
-                          step.status === 'completed' ? 'text-green-300' : 'text-gray-400'
-                        }`}>
-                          {step.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Progress Summary */}
-            <div className="mt-8 p-4 bg-gray-700 rounded-lg">
-              <h4 className="font-semibold text-white mb-3">Rezumat Progres</h4>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-300">MetaMask:</span>
-                  <span className={window.ethereum ? 'text-green-400' : 'text-red-400'}>
-                    {window.ethereum ? '✅ Instalat' : '❌ Lipsește'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Portofel:</span>
-                  <span className={connectionStatus.wallet === 'connected' ? 'text-green-400' : 'text-red-400'}>
-                    {connectionStatus.wallet === 'connected' ? '✅ Conectat' : '❌ Deconectat'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">Rețea:</span>
-                  <span className={connectionStatus.network === 'correct' ? 'text-green-400' : 'text-red-400'}>
-                    {connectionStatus.network === 'correct' ? '✅ Sepolia' : '❌ Greșită'}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-300">ETH:</span>
-                  <span className={connectionStatus.balance === 'sufficient' ? 'text-green-400' : 'text-red-400'}>
-                    {connectionStatus.balance === 'sufficient' ? '✅ Suficient' : '❌ Insuficient'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>      {/* Faucet Modal */}
+          </div>        </div>
+      </div>{/* Faucet Modal */}
       {showFaucet && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-gray-800 rounded-xl max-w-4xl w-full h-[80vh] border border-gray-700">
