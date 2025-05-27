@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Shield, Key, Zap, Copy, ExternalLink, Minimize2, X } from 'lucide-react';
+import { Shield, Key, Zap, Copy, ExternalLink, X } from 'lucide-react';
 
 const DONATION_ADDRESS = '0x742d35cc6634c0532925a3b844bc454e4438f44e';
 // Satoshi quote for reference: "Cancelarul este pe punctul de a aproba al doilea bailout"
@@ -42,17 +42,8 @@ const CypherpunkWelcomeMessage: React.FC<CypherpunkWelcomeMessageProps> = ({ onC
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-40 p-4">
-      <div className="max-w-2xl w-full bg-gray-800 bg-opacity-95 rounded-2xl shadow-2xl border-2 border-purple-500 overflow-hidden relative max-h-[90vh] overflow-y-auto">
-        {/* Butoane control */}
+      <div className="max-w-2xl w-full bg-gray-800 bg-opacity-95 rounded-2xl shadow-2xl border-2 border-purple-500 overflow-hidden relative max-h-[90vh] overflow-y-auto">        {/* Butoane control */}
         <div className="absolute top-4 right-4 flex gap-2 z-10">
-          <button
-            onClick={() => setIsMinimized(true)}
-            className="bg-gray-900/80 hover:bg-gray-700 text-white p-2 rounded-full border border-gray-600 shadow-lg focus:outline-none focus:ring-2 focus:ring-purple-400"
-            title="Minimizează mesajul Cypherpunk"
-            style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.25)' }}
-          >
-            <Minimize2 className="h-5 w-5" />
-          </button>
           <button
             onClick={onClose}
             className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-full border border-red-800 shadow-lg focus:outline-none focus:ring-2 focus:ring-red-400"
