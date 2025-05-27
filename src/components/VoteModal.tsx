@@ -18,12 +18,17 @@ const VoteModal: React.FC<VoteModalProps> = ({
   const [showDetails, setShowDetails] = useState(false);
 
   if (!isOpen) return null;
-
   const estimatedGas = 21000;
-  const estimatedCostEth = (estimatedGas * 20) / 1e9; // 20 gwei  // Adresele pentru votare
+  const estimatedCostEth = (estimatedGas * 20) / 1e9; // 20 gwei
+  
+  // Valori diferite pentru votare
+  const voteAmounts = {
+    NU: '0.000001', // 1 microETH pentru NU
+    DA: '0.000002'  // 2 microETH pentru DA
+  };// Adresele pentru votare - folosim burn address pentru ambele, diferite prin valoare
   const voteAddresses = {
-    NU: '0x742d35Cc6634C0532925a3b8D5c59009e0c20bba',  // Adresa validă pentru NU
-    DA: '0x000000000000000000000000000000000000dEaD'  // Burn address pentru DA
+    NU: '0x000000000000000000000000000000000000dEaD',  // Burn address pentru NU
+    DA: '0x000000000000000000000000000000000000dEaD'   // Burn address pentru DA
   };
 
   const handleVote = () => {
@@ -158,12 +163,13 @@ const VoteModal: React.FC<VoteModalProps> = ({
                 <Info size={16} className="mr-1" />
                 {showDetails ? 'Ascunde' : 'Arată'} detaliile votării
               </button>
-              
-              {showDetails && (
+                {showDetails && (
                 <div className="text-xs space-y-2">
                   <div className="flex justify-between">
                     <span className="text-gray-400">Valoare tranzacție:</span>
-                    <span className="text-purple-300">0.000001 ETH</span>
+                    <span className="text-purple-300">
+                      {selectedVote ? `${voteAmounts[selectedVote]} ETH` : '0.000001-0.000002 ETH'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-400">Gas estimat:</span>

@@ -299,6 +299,31 @@ const UnifiedEscapeRoom = () => {
     return true;
   };
 
+  const connectMetaMask = async () => {
+    if (!window.ethereum) {
+      alert("MetaMask nu este instalat! Te rog să îl instalezi și să îl configurezi pentru rețeaua Sepolia.");
+      return;
+    }
+    
+    try {
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      }) as string[];
+      
+      if (accounts.length > 0) {
+        setUserAddress(accounts[0]);
+        console.log('MetaMask conectat cu succes:', accounts[0]);
+      }
+    } catch (error: any) {
+      console.error('Eroare la conectarea MetaMask:', error);
+      if (error.code === 4001) {
+        alert("Conectarea la MetaMask a fost anulată de utilizator.");
+      } else {
+        alert("❌ Eroare la conectarea cu MetaMask. Încearcă din nou.");
+      }
+    }
+  };
+
   const unlockDrawer = (drawerIndex: number, digit: string) => {
     setGameState(prev => {
       const newDrawersUnlocked = [...prev.drawersUnlocked];
@@ -432,14 +457,13 @@ const UnifiedEscapeRoom = () => {
       setIsLoading(false);
     }
   };
-
   const handleVote = async (candidate: string) => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
     try {
       const signer = getSigner();
-      const voteAmount = ethers.utils.parseEther("0.0001");
-      const voteAddress = "0x0000000000000000000000000000000000000001";
+      const voteAmount = ethers.utils.parseEther("0.000001"); // Micro amount pentru siguranță
+      const voteAddress = "0x000000000000000000000000000000000000dEaD"; // Burn address sigur
       const tx = await signer.sendTransaction({
         to: voteAddress,
         value: voteAmount,
@@ -742,13 +766,17 @@ Ai demonstrat adevăratul spirit Cypherpunk! 🏆`);
               </div>
             </div>
           </div>
-        )}
-
-        {/* Instructions for empty areas */}
+        )}        {/* Instructions for empty areas */}
         {!userAddress && (
           <div className="absolute bottom-4 left-4 right-4 z-20">
             <div className="bg-orange-600/80 backdrop-blur-sm rounded-lg p-4 border border-orange-400 text-center">
-              <p className="text-white">⚠️ Conectează-te cu MetaMask și asigură-te că ești pe rețeaua Sepolia pentru a începe!</p>
+              <p className="text-white mb-3">⚠️ Conectează-te cu MetaMask și asigură-te că ești pe rețeaua Sepolia pentru a începe!</p>
+              <button
+                onClick={connectMetaMask}
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors font-semibold"
+              >
+                🦊 Conectează MetaMask
+              </button>
             </div>
           </div>
         )}

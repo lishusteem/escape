@@ -34,38 +34,31 @@ const TransactionLoadingModal: React.FC<TransactionLoadingModalProps> = ({ isOpe
 
   if (!isOpen) {
     return null;
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[100] backdrop-blur-sm">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-md text-center">
-        <Loader2 className="h-12 w-12 text-purple-400 mx-auto mb-4 animate-spin" />
-        <h3 className="text-xl font-semibold mb-3">Tranzacție în Procesare</h3>
-        <p className="text-gray-300 mb-2 text-sm min-h-[40px]">
+  }  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+      <div className="bg-gray-800 bg-opacity-80 p-6 rounded-lg shadow-2xl text-white border border-purple-600/50 backdrop-blur-sm max-w-md w-full text-center">
+        <div className="flex items-center justify-center space-x-3 mb-4">
+          <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+          <h3 className="text-lg font-semibold">Tranzacție în procesare...</h3>
+        </div>
+        <p className="text-gray-300 text-sm mb-4 min-h-[40px]">
           {messages[currentMessageIndex]}
         </p>
         {transactionHash && (
-          <div className="mt-4">
-            <p className="text-xs text-gray-400 mb-1">Hash Tranzacție:</p>
+          <div className="border-t border-gray-700 pt-4">
+            <p className="text-xs text-gray-400 mb-2">Hash Tranzacție:</p>
             <a
               href={`https://sepolia.etherscan.io/tx/${transactionHash}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-purple-400 hover:text-purple-300 text-xs break-all"
+              className="text-purple-400 hover:text-purple-300 text-xs break-all block"
+              title="Vezi pe Etherscan"
             >
-              {transactionHash}
+              {transactionHash.slice(0, 20)}...{transactionHash.slice(-20)}
             </a>
-            <p className="text-xs text-gray-500 mt-1">(Vezi pe Etherscan)</p>
+            <p className="text-xs text-gray-500 mt-1">(Click pentru a vedea pe Etherscan)</p>
           </div>
         )}
-        {/* {onClose && (
-          <button 
-            onClick={onClose} 
-            className="mt-6 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-          >
-            Închide (for dev)
-          </button>
-        )} */}
       </div>
     </div>
   );

@@ -203,8 +203,13 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
     // Auto-advance from step 4 to 5 when on correct network
     if (connectionStatus.network === 'correct' && currentStep === 4) {
       setCurrentStep(5);
-    }    // Mark as ready when sufficient balance
-    if (connectionStatus.balance === 'sufficient') {
+    }
+  }, [currentStep, connectionStatus.wallet, connectionStatus.network]);
+
+  // Separate effect for handling balance completion
+  useEffect(() => {
+    // Mark as ready when sufficient balance
+    if (connectionStatus.balance === 'sufficient' && !connectionStatus.ready) {
       setConnectionStatus(prev => ({ ...prev, ready: true }));
       // Reset currentStep to 0 when all steps are completed to minimize all containers
       if (currentStep === 5) {
@@ -212,7 +217,7 @@ const CameraEntry = ({ onEntryComplete }: CameraEntryProps) => {
         setCurrentStep(0);
       }
     }
-  }, [connectionStatus, currentStep]);
+  }, [connectionStatus.balance, connectionStatus.ready, currentStep]);
   // Check balance when user address changes and we're on the right network
   useEffect(() => {
     if (userAddress && connectionStatus.network === 'correct') {

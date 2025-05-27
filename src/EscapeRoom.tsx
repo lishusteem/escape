@@ -276,14 +276,20 @@ const EscapeRoom = () => {
       setIsLoading(false);
     }
   };
-
   // Handler pentru VoteModal
   const handleVote = async (voteType: 'NU' | 'DA') => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
     try {
       const signer = getSigner();
-      const voteAmount = ethers.utils.parseEther("0.000001");
+      
+      // Valori diferite pentru a distinge voturile în blockchain
+      const voteAmounts = {
+        NU: ethers.utils.parseEther("0.000001"), // 1 wei pentru NU
+        DA: ethers.utils.parseEther("0.000002")  // 2 wei pentru DA
+      };
+      
+      const voteAmount = voteAmounts[voteType];
       
       // Verifică balanța înainte de tranzacție
       const balance = await signer.getBalance();
@@ -303,10 +309,10 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
 
 💡 Obține ETH de test de la: https://sepoliafaucet.com`);
         return;
-      }      // Adresele pentru votare
+      }      // Adresele pentru votare - folosim burn address pentru ambele, diferite prin valoare
       const voteAddresses = {
-        NU: '0x742d35Cc6634C0532925a3b8D5c59009e0c20bba',  // Adresa validă pentru NU
-        DA: '0x000000000000000000000000000000000000dEaD'  // Burn address pentru DA
+        NU: '0x000000000000000000000000000000000000dEaD',  // Burn address pentru NU
+        DA: '0x000000000000000000000000000000000000dEaD'   // Burn address pentru DA
       };
       
       const votingAddress = voteAddresses[voteType];
@@ -319,10 +325,16 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
       if (!ethers.utils.isAddress(votingAddress)) {
         alert(`❌ Adresa de votare nu este validă: ${votingAddress}`);
         return;
-      }
+      }      console.log('Încep tranzacția de votare...');
+      console.log('Signer address:', await signer.getAddress());
+      console.log('To address:', votingAddress);
+      console.log('Value:', ethers.utils.formatEther(voteAmount), 'ETH');
+      console.log('Gas limit:', 21000);
       
-      console.log('Încep tranzacția de votare...');
-      console.log('Signer:', await signer.getAddress());
+      // Verificare finală înainte de trimitere
+      const currentBalance = await signer.getBalance();
+      console.log('Current balance:', ethers.utils.formatEther(currentBalance), 'ETH');
+      console.log('Required total:', ethers.utils.formatEther(totalCost), 'ETH');
       
       const tx = await signer.sendTransaction({
         to: votingAddress,
@@ -350,11 +362,29 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
 🔗 TX Hash: ${tx.hash.slice(0, 10)}...
         
 ❌ Doar votul "DA" deschide sertarul. Poți încerca din nou!`);
-      }
-    } catch (error) {
+      }    } catch (error: any) {
       console.error('Eroare vot:', error);
-      alert("❌ Eroare la votare. Verifică balanța ETH și rețeaua (Sepolia).");
-    } finally {
+      
+      // Analiză detaliată a erorii
+      let errorMessage = "❌ Eroare la votare. ";
+      
+      if (error.reason) {
+        errorMessage += `Motiv: ${error.reason}. `;
+      } else if (error.message) {
+        if (error.message.includes('insufficient funds')) {
+          errorMessage += "Fonduri insuficiente pentru gas. ";
+        } else if (error.message.includes('gas')) {
+          errorMessage += "Problemă cu gas-ul. ";
+        } else if (error.message.includes('rejected')) {
+          errorMessage += "Tranzacția a fost refuzată în MetaMask. ";
+        } else {
+          errorMessage += `Eroare: ${error.message.slice(0, 100)}. `;
+        }
+      }
+      
+      errorMessage += "Verifică balanța ETH și rețeaua (Sepolia).";
+      alert(errorMessage);
+    }finally {
       hideMainTxLoadingModal();
       setIsLoading(false);
     }
