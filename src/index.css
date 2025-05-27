@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* Custom animations for CryptoWalletPage */
+@keyframes slideIn {
+  from { 
+    opacity: 0; 
+    transform: translateX(-30px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+  to { text-shadow: 0 0 30px rgba(255, 0, 255, 0.8); }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.6s ease-out forwards;
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

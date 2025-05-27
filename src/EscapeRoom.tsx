@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { ethers } from 'ethers';
 import { 
-  Shield, 
   FileSignature, 
   Clock, 
   Vote, 
@@ -9,9 +8,7 @@ import {
   Send, 
   ArrowLeftRight,
   CheckCircle,
-  Lock,
-  ExternalLink,
-  HelpCircle
+  Lock
 } from 'lucide-react';
 import TransactionLoadingModal from './components/TransactionLoadingModal';
 import SendSecretMessageModal from './components/SendSecretMessageModal';
@@ -276,20 +273,14 @@ const EscapeRoom = () => {
       setIsLoading(false);
     }
   };
+
   // Handler pentru VoteModal
   const handleVote = async (voteType: 'NU' | 'DA') => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
     try {
       const signer = getSigner();
-      
-      // Valori diferite pentru a distinge voturile în blockchain
-      const voteAmounts = {
-        NU: ethers.utils.parseEther("0.000001"), // 1 wei pentru NU
-        DA: ethers.utils.parseEther("0.000002")  // 2 wei pentru DA
-      };
-      
-      const voteAmount = voteAmounts[voteType];
+      const voteAmount = ethers.utils.parseEther("0.000001");
       
       // Verifică balanța înainte de tranzacție
       const balance = await signer.getBalance();
@@ -309,10 +300,10 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
 
 💡 Obține ETH de test de la: https://sepoliafaucet.com`);
         return;
-      }      // Adresele pentru votare - folosim burn address pentru ambele, diferite prin valoare
+      }      // Adresele pentru votare
       const voteAddresses = {
-        NU: '0x000000000000000000000000000000000000dEaD',  // Burn address pentru NU
-        DA: '0x000000000000000000000000000000000000dEaD'   // Burn address pentru DA
+        NU: '0x742d35Cc6634C0532925a3b8D5c59009e0c20bba',  // Adresa validă pentru NU
+        DA: '0x000000000000000000000000000000000000dEaD'  // Burn address pentru DA
       };
       
       const votingAddress = voteAddresses[voteType];
@@ -325,16 +316,10 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
       if (!ethers.utils.isAddress(votingAddress)) {
         alert(`❌ Adresa de votare nu este validă: ${votingAddress}`);
         return;
-      }      console.log('Încep tranzacția de votare...');
-      console.log('Signer address:', await signer.getAddress());
-      console.log('To address:', votingAddress);
-      console.log('Value:', ethers.utils.formatEther(voteAmount), 'ETH');
-      console.log('Gas limit:', 21000);
+      }
       
-      // Verificare finală înainte de trimitere
-      const currentBalance = await signer.getBalance();
-      console.log('Current balance:', ethers.utils.formatEther(currentBalance), 'ETH');
-      console.log('Required total:', ethers.utils.formatEther(totalCost), 'ETH');
+      console.log('Încep tranzacția de votare...');
+      console.log('Signer:', await signer.getAddress());
       
       const tx = await signer.sendTransaction({
         to: votingAddress,
@@ -362,29 +347,11 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
 🔗 TX Hash: ${tx.hash.slice(0, 10)}...
         
 ❌ Doar votul "DA" deschide sertarul. Poți încerca din nou!`);
-      }    } catch (error: any) {
-      console.error('Eroare vot:', error);
-      
-      // Analiză detaliată a erorii
-      let errorMessage = "❌ Eroare la votare. ";
-      
-      if (error.reason) {
-        errorMessage += `Motiv: ${error.reason}. `;
-      } else if (error.message) {
-        if (error.message.includes('insufficient funds')) {
-          errorMessage += "Fonduri insuficiente pentru gas. ";
-        } else if (error.message.includes('gas')) {
-          errorMessage += "Problemă cu gas-ul. ";
-        } else if (error.message.includes('rejected')) {
-          errorMessage += "Tranzacția a fost refuzată în MetaMask. ";
-        } else {
-          errorMessage += `Eroare: ${error.message.slice(0, 100)}. `;
-        }
       }
-      
-      errorMessage += "Verifică balanța ETH și rețeaua (Sepolia).";
-      alert(errorMessage);
-    }finally {
+    } catch (error) {
+      console.error('Eroare vot:', error);
+      alert("❌ Eroare la votare. Verifică balanța ETH și rețeaua (Sepolia).");
+    } finally {
       hideMainTxLoadingModal();
       setIsLoading(false);
     }
@@ -553,47 +520,18 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
     }
     return combination;
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-blue-900 p-4 text-white font-sans">
       <div className="max-w-6xl mx-auto">
-        <header className="text-center mb-10">
-          <Shield className="h-20 w-20 text-purple-400 mx-auto mb-4 animate-pulse" />
-          <h1 className="text-5xl font-bold text-white mb-3 tracking-tight">
-            Camera Secretă Cypherpunk
-          </h1>
-          <p className="text-gray-300 text-xl mb-6">
-            Rezolvă 6 provocări blockchain pentru a descoperi combinația seifului.
-          </p>
-          {userAddress && (
-            <div className="mt-4 bg-gray-800 bg-opacity-50 rounded-lg p-3 inline-block shadow-md">
-              <p className="text-blue-300 text-sm">
-                👤 Conectat ca: {`${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`}
-              </p>
-            </div>
-          )}          <div className="mt-6 flex justify-center items-center gap-4 flex-wrap">
-            <button
-              onClick={resetGame}
-              className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-red-500/50 text-sm"
-            >
-              🔄 Resetează Progresul
-            </button>
-            <button
-              onClick={() => setShowSetupGuide(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-blue-500/50 text-sm flex items-center gap-2"
-            >
-              <HelpCircle className="h-4 w-4" />
-              Ghid Configurare MetaMask
-            </button>
-            <button
-              onClick={() => window.open('/interactive-escape.html', '_blank')}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-5 rounded-lg transition-all duration-300 shadow-lg hover:shadow-purple-500/50 text-sm flex items-center gap-2"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Pagina Interactivă
-            </button>
-          </div>
-        </header>
+        {/* Reset button in top right corner */}
+        <div className="flex justify-end mb-6">
+          <button
+            onClick={resetGame}
+            className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-300 shadow-lg hover:shadow-red-500/50 text-sm"
+          >
+            🔄 Resetează Progresul
+          </button>
+        </div>
 
         {/* Challenges Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
@@ -656,7 +594,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
         {gameState.finalUnlocked && (
           <section className="bg-gradient-to-r from-yellow-600 via-orange-600 to-red-600 rounded-xl p-8 border-2 border-yellow-400 shadow-2xl shadow-orange-500/60 mb-12">
             <div className="text-center">
-              <Shield className="h-20 w-20 text-yellow-200 mx-auto mb-5 animate-bounce" />
+              <CheckCircle className="h-20 w-20 text-yellow-200 mx-auto mb-5 animate-bounce" />
               <h2 className="text-4xl font-bold text-white mb-4 tracking-tight">
                 🎉 Felicitări, Cypherpunk! 🎉
               </h2>
@@ -677,7 +615,7 @@ Balanța ta: ${ethers.utils.formatEther(balance)} ETH
             <h3 className="text-xl font-semibold text-purple-300 mb-3">Informații Utile</h3>
             <ul className="list-disc list-inside text-gray-300 space-y-2 text-sm">
                 <li>Acest escape room funcționează pe rețeaua de testare <strong className="text-purple-300">Sepolia</strong>.</li>
-                <li>Vei avea nevoie de ETH pe Sepolia pentru a plăti taxele de gaz (gas fees). Poți obține ETH gratuit de la un <a href="https://sepoliafaucet.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">faucet Sepolia <ExternalLink size={12} className="inline"/></a>.</li>
+                <li>Vei avea nevoie de ETH pe Sepolia pentru a plăti taxele de gaz (gas fees). Poți obține ETH gratuit de la un <a href="https://sepoliafaucet.com/" target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">faucet Sepolia ↗</a>.</li>
                 <li>Asigură-te că portofelul tău MetaMask este conectat și setat pe rețeaua Sepolia.</li>
                 <li>Fiecare provocare deblocată îți oferă o cifră din combinația finală a seifului.</li>
                 <li>Dacă întâmpini erori, verifică consola browserului (F12) pentru detalii.</li>

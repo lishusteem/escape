@@ -1,0 +1,2111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portofelul Secret - Revoluția Cypherpunk</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: #ffffff;
+            min-height: 100vh;
+            overflow: hidden;
+            background: #000; /* Fallback background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        /* Background Image Container - maintains aspect ratio and serves as reference */
+        #backgroundContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #000;
+        }
+
+        #pageBackgroundImage {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain; /* Maintain aspect ratio */
+            display: block;
+        }
+
+        /* Image Overlay Container - positioned relative to background image */
+        #imageOverlayContainer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+
+        #projectionArea {
+            position: absolute; /* Positioned relative to #imageOverlayContainer */
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent black for testing */
+            overflow: hidden; /* Crucial: all simulation content is clipped to this area */
+            pointer-events: auto; /* Re-enable clicks for this area */
+        }
+
+        /* Screen Management - now relative to #projectionArea */
+        .screen {
+            position: absolute; /* Fill the projectionArea */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            /* z-index: 10; */ /* z-index relative to #projectionArea */
+            transition: all 0.5s ease;
+            /* Ensure content within screens can scroll if needed, and backgrounds are contained */
+            overflow: auto; /* Or hidden, depending on desired behavior for individual screens */
+        }
+
+        .screen.active {
+            display: flex; /* Or block, depending on screen content */
+        }
+
+        /* Modern Card Container - ensure it scales well within potentially smaller projection area */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px); /* Reduced blur for potentially smaller area */
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px; /* Slightly smaller radius */
+            padding: 1.5rem; /* Reduced padding */
+            box-shadow: 
+                0 10px 20px rgba(0, 0, 0, 0.2), /* Reduced shadow */
+                0 0 40px rgba(0, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            /* Max width/height can be useful if card is direct child of screen */
+            max-width: 95%;
+            max-height: 95%;
+            margin: auto; /* Center card if screen is flex container */
+        }
+
+        .card:hover {
+            box-shadow: 
+                0 15px 30px rgba(0, 0, 0, 0.3),
+                0 0 50px rgba(0, 255, 255, 0.15);
+            transform: translateY(-3px); /* Reduced transform */
+        }
+
+        /* Boot Screen */
+        .boot-screen {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* padding: 2rem; */ /* Padding is on .card now */
+        }
+
+        .boot-container {
+            /* max-width: 900px; */ /* Let card's max-width handle this */
+            width: 90%; /* Relative to screen */
+        }
+
+        .boot-header {
+            text-align: center;
+            margin-bottom: 1.5rem; /* Reduced margin */
+        }
+
+        .boot-title {
+            font-size: 2rem; /* Reduced font size */
+            font-weight: 700;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 0, 255, 0.8); }
+        }
+
+        .boot-subtitle {
+            font-size: 0.9rem; /* Reduced font size */
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .boot-messages {
+            margin-bottom: 1rem; /* Reduced margin */
+            min-height: 150px; /* Reduced height */
+            font-size: 0.8rem; /* Reduced font size */
+        }
+
+        .boot-message {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.8rem;
+            opacity: 0;
+            animation: slideIn 0.6s ease-out forwards;
+            padding: 0.5rem 0;
+        }
+
+        .boot-message.active {
+            color: #00ffff;
+        }
+
+        .boot-message.completed {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .boot-arrow {
+            color: #00ffff;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        .boot-cursor {
+            animation: blink 1s infinite;
+            color: #00ffff;
+            margin-left: 0.5rem;
+            font-weight: bold;
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(-30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        .progress-container {
+            margin-bottom: 1rem; /* Reduced margin */
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff00ff);
+            width: 0%;
+            transition: width 0.8s ease;
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .boot-status {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        /* Password Screen */
+        .password-screen {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            /* padding: 2rem; */
+        }
+
+        .password-container {
+            /* max-width: 500px; */
+            width: 80%; /* Relative to screen */
+            text-align: center;
+        }
+
+        .password-icon {
+            font-size: 3rem; /* Reduced */
+            margin-bottom: 1rem;
+        }
+
+        .password-title {
+            font-size: 1.8rem; /* Reduced */
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(45deg, #00ffff, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .password-subtitle {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem; /* Reduced */
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .password-form {
+            margin-bottom: 1rem; /* Reduced margin */
+        }
+
+        .password-label {
+            display: block;
+            text-align: left;
+            margin-bottom: 0.5rem;
+            color: #00ffff;
+            font-weight: 600;
+            font-size: 0.9rem; /* Reduced */
+        }
+
+        .password-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 0.8rem 1rem; /* Reduced */
+            border-radius: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem; /* Reduced */
+            margin-bottom: 1rem; /* Reduced */
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .password-input:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .password-input.error {
+            border-color: #ff4444;
+            animation: shake 0.6s ease-in-out;
+            box-shadow: 0 0 20px rgba(255, 68, 68, 0.3);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .password-submit {
+            width: 100%;
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            color: #000000;
+            border: none;
+            padding: 0.8rem 1.5rem; /* Reduced */
+            border-radius: 15px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem; /* Reduced */
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .password-submit:hover {
+            background: linear-gradient(45deg, #00cccc, #0077aa);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .password-submit:active {
+            transform: translateY(0);
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 0.9rem; /* Reduced */
+            margin-bottom: 0.5rem; /* Reduced */
+            animation: pulse 1s infinite;
+            font-weight: 500;
+        }
+
+        .password-hint {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem; /* Reduced */
+            margin-top: 1rem; /* Reduced */
+            line-height: 1.6;
+        }
+
+        .hint-highlight {
+            color: #ffff00;
+            font-weight: 600;
+        }
+
+        /* Desktop Screen - now a child of #projectionArea */
+        .desktop-screen {
+            /* display: flex; */ /* Keep if icons need flex layout */
+            /* flex-direction: column; */ /* Or row, or wrap */
+            /* justify-content: center; */
+            /* align-items: center; */
+            padding: 1rem; /* Padding for icon spacing from edge of projectionArea */
+            /* The mainBackgroundContainer and mainBackgroundImage are removed from HTML */
+        }
+
+        .desktop-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            padding: 1rem; /* Reduced padding */
+            border-radius: 15px; /* Reduced radius */
+            transition: all 0.4s ease;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            /* position: relative; */ /* Not needed if positioned by flex/grid in .desktop-screen */
+            width: 120px; /* Example fixed size, or use percentages */
+            height: 120px; /* Example fixed size */
+            text-align: center;
+        }
+
+        .desktop-icon:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            background: rgba(0, 255, 255, 0.08);
+            transform: translateY(-5px) scale(1.03); /* Adjusted hover */
+        }
+
+        .desktop-icon-image {
+            font-size: 2.5rem; /* Reduced */
+            margin-bottom: 0.5rem; /* Reduced */
+        }
+
+        .desktop-icon-label {
+            font-size: 0.9rem; /* Reduced */
+            font-weight: 600;
+            margin-bottom: 0.2rem;
+        }
+
+        .desktop-icon-subtitle {
+            font-size: 0.7rem; /* Reduced */
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+
+        /* Wallet Window - now relative to #projectionArea */
+        .wallet-window {
+            position: absolute; /* Positioned within #projectionArea */
+            top: 2%;
+            left: 2%;
+            width: 96%;
+            height: 96%;
+            /* Removed: right: 3rem; bottom: 3rem; */
+            background: rgba(0, 0, 0, 0.85); /* Slightly more opaque */
+            backdrop-filter: blur(15px); /* Adjusted blur */
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            border-radius: 15px; /* Adjusted radius */
+            display: none;
+            flex-direction: column;
+            z-index: 100; /* Above other screens in #projectionArea */
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.4), /* Adjusted shadow */
+                0 0 60px rgba(0, 255, 255, 0.15);
+            overflow: hidden;
+        }
+
+        .wallet-window.open {
+            display: flex;
+            animation: slideUp 0.4s ease-out; /* Slightly faster animation */
+        }
+
+        .wallet-titlebar {
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 0.8rem 1rem; /* Reduced */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .wallet-title {
+            color: #00ffff;
+            font-weight: 600;
+            font-size: 0.9rem; /* Reduced */
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .wallet-close {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            border: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .wallet-close:hover {
+            background: linear-gradient(45deg, #ff6666, #ee0000);
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+            transform: scale(1.1);
+        }
+
+        .wallet-close::before {
+            content: '×';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .wallet-content {
+            flex: 1;
+            padding: 1rem; /* Reduced */
+            overflow-y: auto;
+        }
+
+        /* Seed Phrase Styling */
+        .seed-phrase-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .seed-phrase-title {
+            text-align: center;
+            font-size: 1.8rem; /* Reduced */
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00ffff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .seed-phrase-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 1.5rem; /* Reduced */
+            font-size: 0.9rem; /* Reduced */
+            line-height: 1.6;
+        }
+
+        .seed-phrase-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 0.8rem; /* Reduced */
+            margin-bottom: 1.5rem; /* Reduced */
+        }
+
+        .seed-phrase-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .seed-phrase-label {
+            color: #00ffff;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .seed-phrase-input {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            padding: 0.6rem 0.8rem; /* Reduced */
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem; /* Reduced */
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .seed-phrase-input:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .seed-phrase-input:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+        }
+
+        .restore-button {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            color: #000000;
+            border: none;
+            padding: 0.8rem 1.5rem; /* Reduced */
+            border-radius: 15px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1rem; /* Reduced */
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 1rem; /* Reduced */
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .restore-button:hover {
+            background: linear-gradient(45deg, #00cccc, #0077aa);
+            box-shadow: 0 15px 40px rgba(0, 255, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .hint-box {
+            background: rgba(255, 255, 0, 0.08);
+            border: 1px solid rgba(255, 255, 0, 0.3);
+            padding: 1rem; /* Reduced */
+            border-radius: 15px;
+            font-size: 0.8rem; /* Reduced */
+            line-height: 1.6;
+        }
+
+        .hint-box strong {
+            color: #ffff00;
+            font-weight: 600;
+        }
+
+        /* Word Bank Styling */
+        .word-bank {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            justify-content: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            margin-bottom: 1rem; /* Reduced */
+        }
+
+        .word-chip {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.1), rgba(0, 255, 255, 0.05));
+            color: #00ffff;
+            padding: 0.7rem 1.2rem;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+            font-size: 0.95rem;
+            user-select: none;
+        }
+
+        .word-chip:hover {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.2), rgba(0, 255, 255, 0.1));
+            border-color: #00ffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3);
+        }
+
+        .word-chip.used {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.2);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Seed Phrase Slots */
+        .seed-phrase-slot {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            padding: 1rem 1.2rem;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .seed-phrase-slot:hover {
+            border-color: rgba(0, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .seed-phrase-slot.filled {
+            border-style: solid;
+            border-color: rgba(0, 255, 255, 0.6);
+            background: rgba(0, 255, 255, 0.1);
+        }
+
+        .seed-phrase-slot.filled:hover {
+            border-color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .slot-placeholder {
+            color: rgba(255, 255, 255, 0.4);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+
+        .slot-word {
+            color: #00ffff;
+            font-weight: 600;
+        }
+
+        /* Success Screens */
+        .success-screen, .mission-complete {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .success-title, .mission-title {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            animation: rainbow 3s ease-in-out infinite;
+            font-weight: 700;
+        }
+
+        .success-title {
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .mission-title {
+            background: linear-gradient(45deg, #00ff00, #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @keyframes rainbow {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(180deg); }
+        }
+
+        .bitcoin-wallet {
+            background: linear-gradient(135deg, #ff6600, #ffaa00);
+            color: #000000;
+            padding: 3rem;
+            border-radius: 20px;
+            margin: 2rem auto;
+            max-width: 500px;
+            border: 2px solid rgba(255,170,0,0.5);
+            box-shadow: 
+                0 20px 40px rgba(255, 102, 0, 0.3),
+                0 0 60px rgba(255,170,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bitcoin-wallet::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: rotate 4s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .bitcoin-amount {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 1.5rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .satoshi-message {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            text-align: left;
+            margin: 2rem auto;
+            max-width: 700px;
+            transition: all 0.3s ease;
+        }
+
+        .satoshi-message:hover {
+            border-color: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.1);
+        }
+
+        .satoshi-message h3 {
+            color: #00ffff;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .satoshi-message p {
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .fund-input {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            padding: 1.2rem 1.5rem;
+            border-radius: 15px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem auto;
+            display: block;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .fund-input:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .fund-button {
+            background: linear-gradient(45deg, #ff00ff, #cc00cc);
+            color: #ffffff;
+            border: none;
+            padding: 1.2rem 2rem;
+            border-radius: 15px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 1.5rem;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .fund-button:hover {
+            background: linear-gradient(45deg, #ff33ff, #ee00ee);
+            box-shadow: 0 15px 40px rgba(255, 0, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        /* Learning List */
+        .learning-list {
+            background: rgba(0, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin: 2rem auto;
+            max-width: 700px;
+            text-align: left;
+        }
+
+        .learning-list h3 {
+            color: #00cccc;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+        }
+
+        .learning-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .learning-list li {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.8rem 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border-radius: 8px;
+            padding-left: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .learning-list li:hover {
+            color: #00ffff;
+            background: rgba(0, 255, 255, 0.1);
+            transform: translateX(10px);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .action-button {
+            background: linear-gradient(45deg, #00ffff, #0099cc);
+            color: #000000;
+            border: none;
+            padding: 1.2rem 2.5rem;
+            border-radius: 15px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(45deg, #00cccc, #0077aa);
+            box-shadow: 0 10px 30px rgba(0, 255, 255, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .action-button.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #00ffff;
+            border: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        .action-button.secondary:hover {
+            background: rgba(0, 255, 255, 0.1);
+            border-color: #00ffff;
+        }
+
+        
+
+        /* Responsive Design - these might need to be re-evaluated based on projectionArea size */
+        @media (max-width: 768px) { /* This media query now applies to the viewport, not projectionArea size */
+            /* Consider removing or adjusting if projectionArea itself is small */
+            .card {
+                /* padding: 1rem; */ /* Already reduced */
+                /* margin: 0.5rem; */
+            }
+            /* ... other responsive adjustments ... */
+        }
+
+        /* ... (keep existing keyframes: float, glow, slideIn, shimmer, shake, pulse, blink, rainbow, rotate) ... */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 20px rgba(0, 255, 255, 0.5); }
+            to { text-shadow: 0 0 30px rgba(255, 0, 255, 0.8); }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateX(-30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        @keyframes rainbow {
+            0%, 100% { filter: hue-rotate(0deg); }
+            50% { filter: hue-rotate(180deg); }
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes slideUp { /* Keep this for wallet window */
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Background Image Container - maintains aspect ratio and serves as reference -->
+    <div id="backgroundContainer">
+        <img id="pageBackgroundImage" src="finish_line.png" alt="Full page background">
+        
+        <!-- Image Overlay Container - positioned relative to background image -->
+        <div id="imageOverlayContainer">
+            <img id="overlayImage" src="4.png" alt="Overlay image" style="position: absolute; user-select: none; -webkit-user-drag: none; pointer-events: none; z-index: 10000;">
+            
+            <div id="projectionArea">
+        <!-- Boot Screen -->
+        <div id="bootScreen" class="screen boot-screen active">
+            <div class="card boot-container">
+                <div class="boot-header">
+                    <div class="boot-title">CYPHERPUNK SYSTEM</div>
+                    <div class="boot-subtitle">QUANTUM ENCRYPTED • BLOCKCHAIN POWERED</div>
+                </div>
+                <div class="boot-messages" id="bootMessages"></div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="boot-status" id="bootStatus">INITIALIZING SYSTEM... 0%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Password Screen -->
+        <div id="passwordScreen" class="screen password-screen">
+            <div class="card password-container">
+                <div class="password-icon">🔐</div>
+                <div class="password-title">SECURE ACCESS</div>
+                <div class="password-subtitle">AUTHORIZED PERSONNEL ONLY</div>
+                <form class="password-form" onsubmit="handlePasswordSubmit(event)">
+                    <label class="password-label">ACCESS CODE REQUIRED:</label>
+                    <input 
+                        type="password" 
+                        id="passwordInput" 
+                        class="password-input" 
+                        placeholder="Enter security passphrase..."
+                        autocomplete="off"
+                    >
+                    <div id="errorMessage" class="error-message" style="display: none;">
+                        ❌ ACCESS DENIED - INVALID CREDENTIALS
+                    </div>
+                    <button type="submit" class="password-submit">AUTHENTICATE</button>
+                </form>
+                <div class="password-hint">
+                    <div>🔍 <span class="hint-highlight">HINT:</span> Think about the 2008 financial crisis...</div>
+                    <div style="margin-top: 0.5rem;">What word did Satoshi use in the Genesis block?</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Screen -->
+        <div id="desktopScreen" class="screen desktop-screen">
+            <!-- Desktop icons will go here -->
+            <div class="desktop-icon" id="walletIcon" onclick="openWallet()">
+                <div class="desktop-icon-image">💼</div>
+                <div class="desktop-icon-label">Portofelul</div>
+                <div class="desktop-icon-subtitle">Accesează portofelul</div>
+            </div>
+            <!-- Add other desktop icons or elements here -->
+        </div>
+
+        <!-- Wallet Window -->
+        <div id="walletWindow" class="wallet-window">
+            <div class="wallet-content" id="walletContent">
+                <!-- Content will be dynamically inserted here -->
+            </div>
+        </div>
+
+        <!-- Taskbar -->
+        <div class="taskbar">
+            <div class="taskbar-icon"></div>
+            <div id="taskbarWindow" class="taskbar-window" style="display: none;" onclick="openWallet()">
+                Portofelul Secret
+            </div>
+        </div>
+    </div> <!-- End of #projectionArea -->
+        </div> <!-- End of #imageOverlayContainer -->
+    </div> <!-- End of #backgroundContainer -->
+
+    <script>
+        // Application State
+        let currentScreen = 'boot';
+        let walletOpen = false;
+        let walletUnlocked = false;
+        let missionComplete = false;
+        let bootProgress = 0;
+        let fundAddress = '';
+
+        // Configuration for projection area relative to background image (percentage-based)
+        // UPDATED: Final optimized coordinates for the actual monitor screen area in finish_line.png
+        const projectionConfig = {
+            left: 16.00,        // Final optimized positioning
+            top: 11.50,         // Final optimized positioning
+            width: 80.50,       // Final optimized width
+            height: 63.50       // Final optimized height
+        };
+
+        // Calculate and maintain aspect ratio for the projection area
+        const TARGET_ASPECT_RATIO = projectionConfig.width / projectionConfig.height; // ~1.27 (width/height)
+        
+        // Debug mode control - set to false to disable debug features
+        let DEBUG_MODE_ENABLED = false; // Change to true to enable debug controls
+        
+        // Function to maintain aspect ratio when adjusting dimensions
+        function maintainAspectRatio(newWidth, newHeight, lockDimension = 'width') {
+            if (lockDimension === 'width') {
+                // Adjust height to maintain aspect ratio based on width
+                return {
+                    width: newWidth,
+                    height: newWidth / TARGET_ASPECT_RATIO
+                };
+            } else {
+                // Adjust width to maintain aspect ratio based on height
+                return {
+                    width: newHeight * TARGET_ASPECT_RATIO,
+                    height: newHeight
+                };
+            }
+        }
+
+        // Function to resize both dimensions proportionally
+        function resizeProportionally(currentWidth, currentHeight, sizeChange) {
+            // Calculate the scale factor based on the size change
+            const scaleFactor = 1 + (sizeChange / Math.min(currentWidth, currentHeight));
+            const newWidth = currentWidth * scaleFactor;
+            const newHeight = currentHeight * scaleFactor;
+            
+            // Ensure we stay within bounds
+            const maxWidth = 100;
+            const maxHeight = 100;
+            const minWidth = 5;
+            const minHeight = 5;
+            
+            if (newWidth > maxWidth || newHeight > maxHeight) {
+                const widthScale = maxWidth / newWidth;
+                const heightScale = maxHeight / newHeight;
+                const limitScale = Math.min(widthScale, heightScale);
+                return {
+                    width: newWidth * limitScale,
+                    height: newHeight * limitScale
+                };
+            }
+            
+            if (newWidth < minWidth || newHeight < minHeight) {
+                const widthScale = minWidth / newWidth;
+                const heightScale = minHeight / newHeight;
+                const limitScale = Math.max(widthScale, heightScale);
+                return {
+                    width: newWidth * limitScale,
+                    height: newHeight * limitScale
+                };
+            }
+            
+            return {
+                width: newWidth,
+                height: newHeight
+            };
+        }
+
+        // Configuration for overlay image relative to background image (percentage-based)
+        const overlayConfig = {
+            left: 0,            // 0% - overlay covers entire background
+            top: 0,             // 0% - overlay covers entire background
+            width: 100,         // 100% - same as background image
+            height: 100         // 100% - same as background image
+        };
+
+        // Original pixel coordinates (kept for reference and debugging)
+        const originalProjectionCoords = {
+            x: 380,           // X position in pixels from left edge of background image
+            y: 115,           // Y position in pixels from top edge of background image  
+            width: 917,       // Width in pixels of desktop area within the monitor
+            height: 647,      // Height in pixels of desktop area within the monitor
+            naturalImageWidth: 1920,  // Natural width of finish_line.png
+            naturalImageHeight: 1080  // Natural height of finish_line.png
+        };
+
+        // Add a visual indicator to help debug positioning
+        function addDebugOverlay() {
+            const projectionDiv = document.getElementById('projectionArea');
+            if (projectionDiv && !document.getElementById('debugOverlay')) {
+                const overlay = document.createElement('div');
+                overlay.id = 'debugOverlay';
+                overlay.style.cssText = `
+                    position: absolute;
+                    top: 0; left: 0; right: 0; bottom: 0;
+                    border: 3px solid #ff00ff;
+                    background: rgba(255, 0, 255, 0.1);
+                    pointer-events: none;
+                    z-index: 9999;
+                `;
+                overlay.innerHTML = `
+                    <div style="position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.8); 
+                                 color: #ff00ff; padding: 5px; font-size: 12px; border-radius: 3px;">
+                        PROJECTION AREA DEBUG<br>
+                        Press 'D' to hide/show debug overlay<br>
+                        Press 'R' to force layout refresh
+                    </div>
+                `;
+                projectionDiv.appendChild(overlay);
+            }
+        }
+
+        // Debug controls
+        function toggleDebugOverlay() {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            const overlay = document.getElementById('debugOverlay');
+            if (overlay) {
+                overlay.remove();
+                console.log('🔍 Debug overlay hidden');
+            } else {
+                addDebugOverlay();
+                console.log('🔍 Debug overlay shown');
+            }
+        }
+
+        // Interactive positioning adjustment for debugging with aspect ratio locking
+        function adjustProjectionPosition(direction, amount = 1) {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            switch(direction) {
+                case 'left':
+                    projectionConfig.left = Math.max(0, projectionConfig.left - amount);
+                    break;
+                case 'right':
+                    projectionConfig.left = Math.min(100, projectionConfig.left + amount);
+                    break;
+                case 'up':
+                    projectionConfig.top = Math.max(0, projectionConfig.top - amount);
+                    break;
+                case 'down':
+                    projectionConfig.top = Math.min(100, projectionConfig.top + amount);
+                    break;
+                case 'wider':
+                case 'larger':
+                    // Increase size while maintaining aspect ratio
+                    const newDimensionsLarger = resizeProportionally(projectionConfig.width, projectionConfig.height, amount);
+                    projectionConfig.width = newDimensionsLarger.width;
+                    projectionConfig.height = newDimensionsLarger.height;
+                    break;
+                case 'narrower':
+                case 'smaller':
+                    // Decrease size while maintaining aspect ratio
+                    const newDimensionsSmaller = resizeProportionally(projectionConfig.width, projectionConfig.height, -amount);
+                    projectionConfig.width = newDimensionsSmaller.width;
+                    projectionConfig.height = newDimensionsSmaller.height;
+                    break;
+                default:
+                    console.log(`Unknown adjustment direction: ${direction}`);
+                    return;
+            }
+            
+            const currentAspectRatio = (projectionConfig.width / projectionConfig.height).toFixed(3);
+            const targetAspectRatio = TARGET_ASPECT_RATIO.toFixed(3);
+            console.log(`🎛️ Adjusted ${direction} by ${amount}% | Current: ${projectionConfig.width.toFixed(1)}% x ${projectionConfig.height.toFixed(1)}% | Aspect Ratio: ${currentAspectRatio} (target: ${targetAspectRatio})`);
+            updateProjectionAreaLayout();
+        }
+
+        // Separate controls for width and height adjustment (independent of aspect ratio)
+        function adjustProjectionWidth(direction, amount = 1) {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            switch(direction) {
+                case 'increase':
+                case 'wider':
+                    projectionConfig.width = Math.min(100, projectionConfig.width + amount);
+                    break;
+                case 'decrease':
+                case 'narrower':
+                    projectionConfig.width = Math.max(1, projectionConfig.width - amount);
+                    break;
+                default:
+                    console.log(`Unknown width adjustment direction: ${direction}`);
+                    return;
+            }
+            
+            const currentAspectRatio = (projectionConfig.width / projectionConfig.height).toFixed(3);
+            console.log(`📏 Width adjusted ${direction} by ${amount}% | Width: ${projectionConfig.width.toFixed(1)}% | Current aspect ratio: ${currentAspectRatio}`);
+            updateProjectionAreaLayout();
+        }
+
+        function adjustProjectionHeight(direction, amount = 1) {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            switch(direction) {
+                case 'increase':
+                case 'taller':
+                    projectionConfig.height = Math.min(100, projectionConfig.height + amount);
+                    break;
+                case 'decrease':
+                case 'shorter':
+                    projectionConfig.height = Math.max(1, projectionConfig.height - amount);
+                    break;
+                default:
+                    console.log(`Unknown height adjustment direction: ${direction}`);
+                    return;
+            }
+            
+            const currentAspectRatio = (projectionConfig.width / projectionConfig.height).toFixed(3);
+            console.log(`📐 Height adjusted ${direction} by ${amount}% | Height: ${projectionConfig.height.toFixed(1)}% | Current aspect ratio: ${currentAspectRatio}`);
+            updateProjectionAreaLayout();
+        }
+
+        // Print current perfect config for copying
+        function printOptimalConfig() {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            const currentAspectRatio = (projectionConfig.width / projectionConfig.height).toFixed(3);
+            const targetAspectRatio = TARGET_ASPECT_RATIO.toFixed(3);
+            
+            const configText = `const projectionConfig = {
+    left: ${projectionConfig.left.toFixed(2)},
+    top: ${projectionConfig.top.toFixed(2)},
+    width: ${projectionConfig.width.toFixed(2)},
+    height: ${projectionConfig.height.toFixed(2)}
+};`;
+            
+            console.log('📋 Current projection configuration (copy this):');
+            console.log(`// Target Aspect Ratio: ${targetAspectRatio}, Current: ${currentAspectRatio}`);
+            console.log(configText);
+            console.log(`const TARGET_ASPECT_RATIO = ${projectionConfig.width.toFixed(2)} / ${projectionConfig.height.toFixed(2)}; // ~${currentAspectRatio}`);
+            
+            // Try to copy to clipboard
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(configText).then(() => {
+                    console.log('✅ Configuration copied to clipboard!');
+                }).catch(() => {
+                    console.log('❌ Could not copy to clipboard, but config is shown above');
+                });
+            } else {
+                console.log('📝 Copy the configuration above manually');
+            }
+        }
+
+        // Quick copy function for current dimensions only
+        function copyDimensions() {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            const dimensionsText = `width: ${projectionConfig.width.toFixed(2)}%, height: ${projectionConfig.height.toFixed(2)}%`;
+            console.log(`📐 Current dimensions: ${dimensionsText}`);
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(dimensionsText).then(() => {
+                    console.log('✅ Dimensions copied to clipboard!');
+                }).catch(() => {
+                    console.log('❌ Could not copy to clipboard');
+                });
+            }
+        }
+
+        // Show all available controls
+        function showControlHelp() {
+            if (!DEBUG_MODE_ENABLED) return;
+            
+            console.log('🎮 PROJECTION AREA CONTROLS:');
+            console.log('');
+            console.log('📍 POSITIONING:');
+            console.log('  Arrow Keys: Move projection area (Hold Shift for fine control)');
+            console.log('');
+            console.log('📏 SIZE (Aspect Ratio Locked):');
+            console.log('  + / =: Increase size proportionally');
+            console.log('  -: Decrease size proportionally');
+            console.log('');
+            console.log('📐 WIDTH CONTROLS:');
+            console.log('  Ctrl + W: Increase width');
+            console.log('  Alt + W: Decrease width');
+            console.log('  ] (right bracket): Increase width');
+            console.log('  [ (left bracket): Decrease width');
+            console.log('');
+            console.log('📏 HEIGHT CONTROLS:');
+            console.log('  Ctrl + H: Increase height');
+            console.log('  Alt + H: Decrease height');
+            console.log("  ' (apostrophe): Increase height");
+            console.log('  ; (semicolon): Decrease height');
+            console.log('');
+            console.log('🛠️ DEBUG CONTROLS:');
+            console.log('  D: Toggle debug overlay (red border)');
+            console.log('  R: Refresh layout manually');
+            console.log('  P: Print current configuration (with clipboard copy)');
+            console.log('  C: Copy current dimensions only');
+            console.log('  ?: Show this help (? key)');
+            console.log('');
+            console.log('💡 TIP: Hold Shift for fine adjustments (0.1% instead of 0.5%)');
+        }
+
+        // Boot sequence messages
+        const bootSequence = [
+            "INITIALIZING QUANTUM ENCRYPTION PROTOCOLS...",
+            "ESTABLISHING SECURE BLOCKCHAIN CONNECTION...",
+            "LOADING CYPHERPUNK NETWORK INTERFACES...",
+            "VERIFYING CRYPTOGRAPHIC KEY SIGNATURES...",
+            "ACTIVATING PRIVACY PROTECTION SYSTEMS...",
+            "SYSTEM READY - AUTHENTICATION REQUIRED"
+        ];
+
+        // Correct seed phrase
+        const correctSeedPhrase = [
+            'talent', 'witness', 'glance', 'midnight', 'escape', 'ocean',
+            'response', 'silent', 'together', 'volcano', 'robot', 'dream'
+        ];
+
+
+        function startBootSequence() {
+            const messagesContainer = document.getElementById('bootMessages');
+            const progressFill = document.getElementById('progressFill');
+            const bootStatus = document.getElementById('bootStatus');
+
+            let messageIndex = 0;
+
+            const interval = setInterval(() => {
+                if (messageIndex < bootSequence.length) {
+                    const messageDiv = document.createElement('div');
+                    messageDiv.className = 'boot-message active';
+                    messageDiv.innerHTML = `
+                        <span class="boot-arrow">▶</span>
+                        <span>${bootSequence[messageIndex]}</span>
+                        <span class="boot-cursor">█</span>
+                    `;
+                    messagesContainer.appendChild(messageDiv);
+
+                    const allMessages = messagesContainer.querySelectorAll('.boot-message');
+                    if (allMessages.length > 1) {
+                        const prevMessage = allMessages[allMessages.length - 2];
+                        prevMessage.className = 'boot-message completed';
+                        const cursor = prevMessage.querySelector('.boot-cursor');
+                        if (cursor) cursor.remove();
+                    }
+
+                    bootProgress = messageIndex + 1;
+                    const percentage = Math.round((bootProgress / bootSequence.length) * 100);
+                    progressFill.style.width = percentage + '%';
+                    bootStatus.textContent = `LOADING CYPHERPUNK SYSTEMS... ${percentage}%`;
+
+                    messageIndex++;
+                } else {
+                    clearInterval(interval);
+                    
+                    const allMessages = messagesContainer.querySelectorAll('.boot-message');
+                    if (allMessages.length > 0) {
+                        const finalMessage = allMessages[allMessages.length - 1];
+                        finalMessage.className = 'boot-message completed';
+                        const cursor = finalMessage.querySelector('.boot-cursor');
+                        if (cursor) cursor.remove();
+                    }
+
+                    bootStatus.textContent = 'BOOT SEQUENCE COMPLETE - PROCEEDING TO AUTHENTICATION';
+                    setTimeout(() => {
+                        goToPassword();
+                    }, 2000);
+                }
+            }, 1200);
+        }
+
+        function showScreen(screenId) {
+            // Ensure we are selecting screens within projectionArea if needed, but IDs are global.
+            // This logic should still work as it targets elements by their unique IDs.
+            document.querySelectorAll('#projectionArea > .screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.add('active');
+            } else {
+                console.error("Screen not found:", screenId);
+            }
+            currentScreen = screenId.replace('Screen', '');
+        }
+
+        function goToPassword() {
+            showScreen('passwordScreen');
+            setTimeout(() => {
+                const passwordInput = document.getElementById('passwordInput');
+                if (passwordInput) {
+                    passwordInput.focus();
+                }
+            }, 200);
+        }
+
+        function goToDesktop() {
+            showScreen('desktopScreen');
+            // Initialize/update projection area layout when desktop becomes active
+            // This is now handled by the MutationObserver as well
+        }
+
+        function handlePasswordSubmit(event) {
+            event.preventDefault();
+            const passwordInput = document.getElementById('passwordInput');
+            const password = passwordInput.value.toLowerCase().trim();
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Clear any previous error states
+            passwordInput.classList.remove('error');
+            errorMessage.style.display = 'none';
+
+            if (password === 'bailout') {
+                goToDesktop();
+            } else {
+                passwordInput.classList.add('error');
+                errorMessage.style.display = 'block';
+                passwordInput.value = '';
+                
+                setTimeout(() => {
+                    passwordInput.focus();
+                    errorMessage.style.display = 'none';
+                    passwordInput.classList.remove('error');
+                }, 2500);
+            }
+        }
+
+        function openWallet() {
+            walletOpen = true;
+            document.getElementById('walletWindow').classList.add('open');
+            document.getElementById('taskbarWindow').style.display = 'block'; // Or 'flex' if it's a flex item
+            
+            if (missionComplete) {
+                showMissionComplete();
+            } else if (walletUnlocked) {
+                showWalletUnlocked();
+            } else {
+                showSeedPhraseInput();
+            }
+        }
+
+        function closeWallet() {
+            walletOpen = false;
+            document.getElementById('walletWindow').classList.remove('open');
+            // document.getElementById('taskbarWindow').style.display = 'none'; // Keep taskbar item visible? Or hide?
+                                                                            // User story implies taskbar item appears when wallet is open.
+                                                                            // Let's keep it consistent with openWallet.
+        }
+        
+        function showSeedPhraseInput() {
+            const extraWords = ['bitcoin', 'blockchain', 'satoshi', 'crypto', 'digital', 'money', 'freedom', 'revolution'];
+            const allWords = [...correctSeedPhrase, ...extraWords];
+            const shuffledWords = allWords.sort(() => Math.random() - 0.5);
+
+            const content = document.getElementById('walletContent');
+            content.innerHTML = `
+                <div class="seed-phrase-container" style="display: flex; flex-direction: column; height: 100%; padding: 0.2rem; box-sizing: border-box;">
+                    <h3 class="seed-phrase-title" style="text-align: center; margin-bottom: 0.2rem; font-size: 1.1rem; color: #00ffff;">Portofelul Secret</h3>
+                    <p class="seed-phrase-subtitle" style="text-align: center; margin-bottom: 0.3rem; font-size: 0.8rem;">Recuperează portofelul introducând cuvintele secrete.</p>
+
+                    <div class="seed-phrase-content-columns" style="display: flex; flex-direction: row; flex-grow: 1; gap: 0.5rem; overflow: hidden; margin-bottom: 0.3rem;">
+                        <!-- Left Column: Word Bank - moved further left with wider flex -->
+                        <div class="word-bank-column" style="flex: 0.8; display: flex; flex-direction: column; background-color: rgba(0,0,0,0.25); border-radius: 4px; padding: 0.2rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); margin-right: 0.3rem;">
+                            <h4 style="color: #00ffff; margin-top:0; margin-bottom: 0.3rem; font-size: 0.9rem; text-align: center;">📝 Cuvinte Disponibile</h4>
+                            <div class="word-bank" style="overflow-y: auto; display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center; align-content: flex-start; padding: 0.1rem; flex-grow: 1;">
+                                ${shuffledWords.map((word) => `
+                                    <div class="word-chip" onclick="selectWord('${word}', this)" data-word="${word}" style="font-size: 1.1rem; padding: 0.25rem 0.5rem; background-color: rgba(255,255,255,0.1); border-radius: 3px; cursor: pointer;">
+                                        ${word}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Seed Phrase Slots - changed to 4x3 grid (4 rows, 3 columns) -->
+                        <div class="slots-column" style="flex: 1.0; display: flex; flex-direction: column; background-color: rgba(0,0,0,0.25); border-radius: 4px; padding: 0.2rem; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+                            <h4 style="color: #00ffff; margin-top:0; margin-bottom: 0.3rem; font-size: 0.9rem; text-align: center;">🔢 Ordine Secretă (12)</h4>
+                            <div class="seed-phrase-grid" id="seedPhraseGrid" style="overflow-y: auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(4, 1fr); gap: 0.4rem; padding: 0.1rem; flex-grow: 1; align-content: flex-start;">
+                                ${Array.from({length: 12}, (_, i) => `
+                                    <div class="seed-phrase-item" style="display: flex; flex-direction: column; /* Ensure label is above slot */ align-items: stretch; /* Stretch children */ background-color: rgba(0,0,0,0.2); border-radius: 3px; padding: 0.25rem;">
+                                        <span class="seed-phrase-label" style="font-size: 0.7rem; color: #aaa; margin-bottom: 0.1rem; text-align: left;">Cuvânt #${i + 1}</span>
+                                        <div id="slot${i}" class="seed-phrase-slot" onclick="clearSlot(${i})" style="border: 1px solid #444; border-radius: 3px; padding: 0.5rem; text-align: center; cursor: pointer; min-height: 2.8rem; display: flex; align-items: center; justify-content: center; background-color: rgba(255,255,255,0.05);">
+                                            <span class="slot-placeholder" style="font-style: italic; color: #666; font-size: 0.8rem;">Slot Gol</span>
+                                            <span class="slot-word" style="display: none; font-size: 1.0rem; color: #fff;"></span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="restore-button" onclick="validateSeedPhrase()" style="padding: 0.6rem; font-size: 0.95rem; width: 100%; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        🔓 RESTAUREAZĂ PORTOFEL
+                    </button>
+                    <div class="hint-box" style="font-size:0.7rem; padding: 0.35rem; margin-top: 0.3rem; text-align: center; color: #ccc;">
+                        <strong>🔑 Indiciu:</strong> Click pe cuvinte pentru a le selecta. Click pe un slot plin pentru a-l goli.
+                    </div>
+                </div>
+            `;
+        }
+        
+        let selectedWordsForSlots = new Array(12).fill(null);
+        let lastClickedSlot = null;
+
+        function selectWord(word, chipElement) {
+            if (chipElement.classList.contains('used')) return;
+
+            const availableSlotIndex = selectedWordsForSlots.findIndex(slotWord => slotWord === null);
+            if (availableSlotIndex !== -1) {
+                fillSlot(availableSlotIndex, word);
+                chipElement.classList.add('used');
+            } else {
+                alert("Toate sloturile sunt pline. Eliberează un slot mai întâi.");
+            }
+        }
+
+        function fillSlot(slotIndex, word) {
+            const slotElement = document.getElementById(`slot${slotIndex}`);
+            if (!slotElement) return;
+
+            const placeholder = slotElement.querySelector('.slot-placeholder');
+            const wordSpan = slotElement.querySelector('.slot-word');
+
+            selectedWordsForSlots[slotIndex] = word;
+            wordSpan.textContent = word;
+            wordSpan.style.display = 'inline';
+            placeholder.style.display = 'none';
+            slotElement.classList.add('filled');
+        }
+        
+        function clearSlot(slotIndex) {
+            const slotElement = document.getElementById(`slot${slotIndex}`);
+            if (!slotElement || !selectedWordsForSlots[slotIndex]) return;
+
+            const oldWord = selectedWordsForSlots[slotIndex];
+            selectedWordsForSlots[slotIndex] = null;
+
+            const placeholder = slotElement.querySelector('.slot-placeholder');
+            const wordSpan = slotElement.querySelector('.slot-word');
+            
+            wordSpan.textContent = '';
+            wordSpan.style.display = 'none';
+            placeholder.style.display = 'inline';
+            slotElement.classList.remove('filled');
+
+            // Make the word chip available again
+            const wordBank = document.querySelector('.word-bank');
+            const chipElement = wordBank.querySelector(`.word-chip[data-word="${oldWord}"]`);
+            if (chipElement) {
+                chipElement.classList.remove('used');
+            }
+        }
+
+
+        function validateSeedPhrase() {
+            const isCorrect = selectedWordsForSlots.every((word, index) => word === correctSeedPhrase[index]);
+
+            if (isCorrect) {
+                walletUnlocked = true;
+                showWalletUnlocked();
+            } else {
+                alert('🚫 Seed phrase incorect! Verifică cuvintele și ordinea lor.');
+                // Optionally, provide more specific feedback or clear incorrect slots
+                selectedWordsForSlots.forEach((word, index) => {
+                    const slotElement = document.getElementById(`slot${index}`);
+                    if (word !== correctSeedPhrase[index]) {
+                        slotElement.style.borderColor = '#ff4444'; // Highlight incorrect slots
+                    } else {
+                         slotElement.style.borderColor = ''; // Reset correct ones
+                    }
+                });
+                setTimeout(() => {
+                     selectedWordsForSlots.forEach((_, index) => {
+                        document.getElementById(`slot${index}`).style.borderColor = '';
+                     });
+                }, 3000);
+            }
+        }
+
+        function showWalletUnlocked() {
+            const content = document.getElementById('walletContent');
+            content.innerHTML = `
+                <div class="success-screen" style="padding: 1rem;">
+                    <h2 class="success-title" style="font-size: 1.5rem;">🎊 FELICITĂRI! 🎊</h2>
+                    <p style="font-size: 1rem; margin-bottom: 1rem;">Ai descoperit portofelul pierdut al lui Satoshi Nakamoto!</p>
+                    <div class="bitcoin-wallet" style="padding: 1rem; margin: 1rem auto;">
+                        <div style="font-size: 2rem;">💼</div>
+                        <div class="bitcoin-amount" style="font-size: 1.5rem;">1,000,000 BTC</div>
+                        <div style="font-weight: 600; font-size: 0.9rem;"></div>
+                    </div>
+                    <div class="satoshi-message" style="padding: 1rem; font-size: 0.8rem;">
+                        <h3 style="font-size: 1rem;">📜 MESAJ DE LA SATOSHI:</h3>
+                        <p>"Dragă explorator, Felicitări pentru că ai dovedit înțelegerea principiilor blockchain.</p>
+                        <p>Aceste criptomonede nu au fost niciodată menite să fie deținute de o singură persoană.</p>
+                        <p>Adevăratul scop al Bitcoin a fost să creeze un sistem financiar liber, deschis tuturor.</p>
+                        <p>Pentru a finaliza această aventură și a ieși din cameră, te rog să trimiți aceste monede către 'Fondul Revoluției Cypherpunk' pentru a susține viitorul tehnologiilor descentralizate."</p>
+                    </div>
+                    <label style="font-size: 1rem; margin: 1rem 0 0.5rem 0;">💳 Adresa Fondului:</label>
+                    <input type="text" id="fundAddressInput" class="fund-input" style="padding: 0.8rem; font-size:0.8rem;" placeholder="Introdu adresa..." value="${fundAddress}" oninput="fundAddress = this.value">
+                    <button class="fund-button" style="padding: 0.8rem 1.2rem; font-size:0.9rem;" onclick="sendToFund()">
+                        💰 TRIMITE
+                    </button>
+                </div>
+            `;
+        }
+
+        function sendToFund() {
+            const address = document.getElementById('fundAddressInput').value.toLowerCase().trim();
+            if (address === '0x742d35cc6634c0532925a3b844bc454e4438f44e') {
+                missionComplete = true;
+                showMissionComplete();
+            } else {
+                const input = document.getElementById('fundAddressInput');
+                input.style.borderColor = '#ff4444';
+                setTimeout(() => { input.style.borderColor = ''; }, 3000);
+                alert('🚫 Adresa incorectă!');
+            }
+        }
+
+        function showMissionComplete() {
+            const content = document.getElementById('walletContent');
+            content.innerHTML = `
+                <div class="mission-complete" style="padding:1rem;">
+                    <h2 class="mission-title" style="font-size: 1.5rem;">🎉 MISIUNE COMPLETĂ! 🎉</h2>
+                    <p style="font-size: 1rem; margin-bottom: 1rem;">Ai îndeplinit voința lui Satoshi!</p>
+                    <div class="learning-list" style="padding: 1rem; font-size:0.8rem;">
+                        <h3 style="font-size:1rem;">🎓 Ai învățat despre:</h3>
+                        <ul><li>Semnături digitale</li><li>Timestamping</li><li>Vot blockchain</li><li>Contracte inteligente</li><li>Transferuri de valoare</li><li>Tokenuri</li><li>NFT-uri</li><li>Seed phrase-uri</li></ul>
+                    </div>
+                    <div class="action-buttons" style="margin-top:1rem;">
+                        <button class="action-button" style="padding:0.8rem 1.2rem; font-size:0.8rem;" onclick="downloadCertificate()">📜 CERTIFICAT</button>
+                        <button class="action-button secondary" style="padding:0.8rem 1.2rem; font-size:0.8rem;" onclick="restartAdventure()">🔄 REÎNCEPE</button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function downloadCertificate() {
+            alert('🎓 Certificatul "Revoluția Cypherpunk" a fost descărcat!');
+        }
+
+        function restartAdventure() {
+            currentScreen = 'boot';
+            walletOpen = false;
+            walletUnlocked = false;
+            missionComplete = false;
+            bootProgress = 0;
+            fundAddress = '';
+            selectedWordsForSlots = new Array(12).fill(null); // Reset selected words
+
+            closeWallet();
+            document.getElementById('bootMessages').innerHTML = '';
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('bootStatus').textContent = 'INITIALIZING SYSTEM... 0%';
+            document.getElementById('passwordInput').value = '';
+            showScreen('bootScreen');
+            setTimeout(startBootSequence, 1000);
+        }
+
+
+        // Projection Area Layout Logic - based on background image container with aspect ratio preservation
+        function updateProjectionAreaLayout() {
+            const backgroundContainer = document.getElementById('backgroundContainer');
+            const img = document.getElementById('pageBackgroundImage');
+            const overlayContainer = document.getElementById('imageOverlayContainer');
+            const projectionDiv = document.getElementById('projectionArea');
+            const overlayImg = document.getElementById('overlayImage');
+
+            if (!img || !projectionDiv || !backgroundContainer || !overlayContainer) {
+                console.error("Required elements missing for container-based layout.");
+                return;
+            }
+
+            if (!img.naturalWidth || !img.naturalHeight || img.naturalWidth === 0) {
+                console.warn("Background image not loaded yet, waiting...");
+                return;
+            }
+
+            // Get the actual displayed dimensions of the background image
+            const imgRect = img.getBoundingClientRect();
+            
+            // Update the overlay container to match the exact dimensions and position of the background image
+            overlayContainer.style.left = (imgRect.left - backgroundContainer.getBoundingClientRect().left) + 'px';
+            overlayContainer.style.top = (imgRect.top - backgroundContainer.getBoundingClientRect().top) + 'px';
+            overlayContainer.style.width = imgRect.width + 'px';
+            overlayContainer.style.height = imgRect.height + 'px';
+            
+            // Calculate projection area dimensions relative to the background image
+            // NO ASPECT RATIO LOCK - use exact dimensions from config for independent width/height control
+            const projectionWidth = imgRect.width * projectionConfig.width / 100;
+            const projectionHeight = imgRect.height * projectionConfig.height / 100;
+            
+            // Position projection area relative to the overlay container (which matches the background image)
+            const projectionLeft = imgRect.width * projectionConfig.left / 100;
+            const projectionTop = imgRect.height * projectionConfig.top / 100;
+            
+            projectionDiv.style.left = projectionLeft + 'px';
+            projectionDiv.style.top = projectionTop + 'px';
+            projectionDiv.style.width = projectionWidth + 'px';
+            projectionDiv.style.height = projectionHeight + 'px';
+            
+            // Position overlay image relative to the overlay container
+            if (overlayImg) {
+                const overlayLeft = imgRect.width * overlayConfig.left / 100;
+                const overlayTop = imgRect.height * overlayConfig.top / 100;
+                const overlayWidth = imgRect.width * overlayConfig.width / 100;
+                const overlayHeight = imgRect.height * overlayConfig.height / 100;
+                
+                overlayImg.style.left = overlayLeft + 'px';
+                overlayImg.style.top = overlayTop + 'px';
+                overlayImg.style.width = overlayWidth + 'px';
+                overlayImg.style.height = overlayHeight + 'px';
+            }
+            
+            console.log('🎯 Container-based positioning applied (no aspect ratio lock):', {
+                backgroundImage: {
+                    natural: `${img.naturalWidth}x${img.naturalHeight}`,
+                    displayed: `${imgRect.width.toFixed(1)}x${imgRect.height.toFixed(1)}`,
+                    position: `(${imgRect.left.toFixed(1)}, ${imgRect.top.toFixed(1)})`
+                },
+                overlayContainer: {
+                    dimensions: `${overlayContainer.style.width} x ${overlayContainer.style.height}`,
+                    position: `(${overlayContainer.style.left}, ${overlayContainer.style.top})`
+                },
+                projection: {
+                    config: `${projectionConfig.left}%, ${projectionConfig.top}%, ${projectionConfig.width}%, ${projectionConfig.height}%`,
+                    finalDimensions: `${projectionWidth.toFixed(1)}x${projectionHeight.toFixed(1)} at (${projectionLeft.toFixed(1)}, ${projectionTop.toFixed(1)})`,
+                    currentAspectRatio: (projectionWidth / projectionHeight).toFixed(3),
+                    targetAspectRatio: TARGET_ASPECT_RATIO.toFixed(3)
+                }
+            });
+        }
+
+        function initializeProjectionEnvironment() {
+            const backgroundImg = document.getElementById('pageBackgroundImage');
+            const overlayImg = document.getElementById('overlayImage');
+            
+            console.log('🚀 Initializing percentage-based positioning system...');
+            console.log('🖼️ Background image element:', backgroundImg);
+            console.log('🎭 Overlay image element:', overlayImg);
+            console.log('📊 Projection config (%):', projectionConfig);
+            console.log('📊 Overlay config (%):', overlayConfig);
+            
+            if (backgroundImg) {
+                console.log('📏 Image dimensions:', {
+                    complete: backgroundImg.complete,
+                    naturalWidth: backgroundImg.naturalWidth,
+                    naturalHeight: backgroundImg.naturalHeight,
+                    src: backgroundImg.src
+                });
+                
+                if (backgroundImg.complete && backgroundImg.naturalWidth > 0) {
+                    console.log("✅ Background image already loaded. Updating projection area layout.");
+                    updateProjectionAreaLayout();
+                } else {
+                    console.log("⏳ Waiting for background image to load for projection area positioning.");
+                    backgroundImg.onload = () => {
+                        console.log("✅ Background image loaded. Updating projection area layout.");
+                        updateProjectionAreaLayout();
+                    };
+                    backgroundImg.onerror = () => {
+                        console.error("❌ Error loading background image #pageBackgroundImage.");
+                        console.error("📁 Check if 'finish_line.png' exists in the same directory as HTML.");
+                        
+                        // Fallback: create a colored background and center the projection area
+                        document.body.style.background = 'linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)';
+                        
+                        const projectionDiv = document.getElementById('projectionArea');
+                        if(projectionDiv) {
+                            // Center the projection area on screen with fallback dimensions
+                            projectionDiv.style.left = '50%';
+                            projectionDiv.style.top = '50%';
+                            projectionDiv.style.transform = 'translate(-50%, -50%)';
+                            projectionDiv.style.width = '80vw';
+                            projectionDiv.style.height = '80vh';
+                            projectionDiv.style.backgroundColor = 'rgba(255,0,0,0.2)'; // Visual error indicator
+                            projectionDiv.style.border = '2px solid #ff4444';
+                        }
+                    };
+                }
+                
+                // Handle overlay image loading
+                if (overlayImg) {
+                    if (overlayImg.complete && overlayImg.naturalWidth > 0) {
+                        console.log("✅ Overlay image already loaded.");
+                    } else {
+                        console.log("⏳ Waiting for overlay image to load.");
+                        overlayImg.onload = () => {
+                            console.log("✅ Overlay image loaded.");
+                            updateProjectionAreaLayout(); // Update layout to ensure overlay is positioned
+                        };
+                        overlayImg.onerror = () => {
+                            console.error("❌ Error loading overlay image #overlayImage.");
+                            console.error("📁 Check if '4.png' exists in the same directory as HTML.");
+                            overlayImg.style.display = 'none'; // Hide overlay if it fails to load
+                        };
+                    }
+                }
+                
+                // Update layout on window resize
+                window.addEventListener('resize', () => {
+                    console.log('🔄 Window resized, updating percentage-based positioning...');
+                    updateProjectionAreaLayout();
+                });
+            } else {
+                console.error("❌ Background image element #pageBackgroundImage not found.");
+            }
+        }
+
+        // Enhanced layout update function that triggers on multiple events
+        function ensureCorrectLayout() {
+            updateProjectionAreaLayout();
+        }
+
+        // Continuous monitoring to ensure layout stays correct with percentage-based positioning
+        let layoutMonitorInterval;
+        function startLayoutMonitoring() {
+            // Check layout every 3 seconds when page is visible
+            layoutMonitorInterval = setInterval(() => {
+                if (!document.hidden) {
+                    const projectionDiv = document.getElementById('projectionArea');
+                    const backgroundImg = document.getElementById('pageBackgroundImage');
+                    
+                    if (projectionDiv && backgroundImg && backgroundImg.complete) {
+                        // Check if background image position/size has changed
+                        const currentImgRect = backgroundImg.getBoundingClientRect();
+                        const currentProjRect = projectionDiv.getBoundingClientRect();
+                        
+                        // Calculate expected projection area position based on percentage configuration
+                        const expectedLeft = currentImgRect.left + (currentImgRect.width * projectionConfig.left / 100);
+                        const expectedTop = currentImgRect.top + (currentImgRect.height * projectionConfig.top / 100);
+                        const expectedWidth = currentImgRect.width * projectionConfig.width / 100;
+                        const expectedHeight = currentImgRect.height * projectionConfig.height / 100;
+                        
+                        const tolerance = 5; // 5px tolerance
+                        if (Math.abs(currentProjRect.left - expectedLeft) > tolerance || 
+                            Math.abs(currentProjRect.top - expectedTop) > tolerance ||
+                            Math.abs(currentProjRect.width - expectedWidth) > tolerance ||
+                            Math.abs(currentProjRect.height - expectedHeight) > tolerance) {
+                            console.log('⚠️ Background image layout drift detected, correcting...');
+                            updateProjectionAreaLayout();
+                        }
+                    }
+                }
+            }, 3000);
+        }
+
+        function stopLayoutMonitoring() {
+            if (layoutMonitorInterval) {
+                clearInterval(layoutMonitorInterval);
+                layoutMonitorInterval = null;
+            }
+        }
+
+        // Initialize application
+        window.addEventListener('DOMContentLoaded', function() {
+            initializeProjectionEnvironment(); // Setup projection area sizing first
+            
+            // Log aspect ratio information and controls
+            const currentAspectRatio = (projectionConfig.width / projectionConfig.height).toFixed(3);
+            console.log(`🎯 Projection Area: ${projectionConfig.width.toFixed(1)}% x ${projectionConfig.height.toFixed(1)}% (Aspect Ratio: ${currentAspectRatio})`);
+            console.log(`🎮 Controls Available:`);
+            console.log(`   • Arrow Keys: Move position (Hold Shift for fine control)`);
+            console.log(`   • +/- Keys: Resize with aspect ratio lock`);
+            console.log(`   • Ctrl+W/Alt+W or ]/[: Adjust width independently`);
+            console.log(`   • Ctrl+H/Alt+H or '/;: Adjust height independently`);
+            console.log(`   • D: Toggle debug overlay | R: Refresh | P: Print config | C: Copy dimensions | ?: Show all controls`);
+            console.log(`💡 Press ? key for full control help`);
+            console.log(``);
+            
+            setTimeout(() => {
+                startBootSequence();
+                startLayoutMonitoring(); // Start continuous monitoring
+            }, 1500); // Then start boot
+        });
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape' && walletOpen) {
+                closeWallet();
+            }
+            
+            // Debug controls (only when not typing in inputs and DEBUG_MODE_ENABLED)
+            if (!event.target.matches('input, textarea') && DEBUG_MODE_ENABLED) {
+                // Basic debug controls
+                if (event.key.toLowerCase() === 'd') {
+                    toggleDebugOverlay();
+                    event.preventDefault();
+                }
+                if (event.key.toLowerCase() === 'r') {
+                    console.log('🔄 Manual layout refresh triggered');
+                    ensureCorrectLayout();
+                    event.preventDefault();
+                }
+                if (event.key.toLowerCase() === 'p') {
+                    printOptimalConfig();
+                    event.preventDefault();
+                }
+                if (event.key === '?' || (event.shiftKey && event.key === '/')) {
+                    showControlHelp();
+                    event.preventDefault();
+                }
+                if (event.key.toLowerCase() === 'c') {
+                    copyDimensions();
+                    event.preventDefault();
+                }
+
+                // Interactive positioning controls (use with Shift for fine adjustment)
+                const step = event.shiftKey ? 0.1 : 0.5;
+                if (event.key === 'ArrowLeft') {
+                    adjustProjectionPosition('left', step);
+                    event.preventDefault();
+                }
+                if (event.key === 'ArrowRight') {
+                    adjustProjectionPosition('right', step);
+                    event.preventDefault();
+                }
+                if (event.key === 'ArrowUp') {
+                    adjustProjectionPosition('up', step);
+                    event.preventDefault();
+                }
+                if (event.key === 'ArrowDown') {
+                    adjustProjectionPosition('down', step);
+                    event.preventDefault();
+                }
+                // Size adjustment with + and - keys (aspect-ratio locked)
+                if (event.key === '=' || event.key === '+') {
+                    adjustProjectionPosition('larger', step);
+                    event.preventDefault();
+                }
+                if (event.key === '-') {
+                    adjustProjectionPosition('smaller', step);
+                    event.preventDefault();
+                }
+
+                // Separate width controls (W key + modifiers)
+                if (event.key.toLowerCase() === 'w') {
+                    if (event.ctrlKey) {
+                        // Ctrl + W: Increase width
+                        adjustProjectionWidth('increase', step);
+                    } else if (event.altKey) {
+                        // Alt + W: Decrease width
+                        adjustProjectionWidth('decrease', step);
+                    }
+                    event.preventDefault();
+                }
+
+                // Separate height controls (H key + modifiers)
+                if (event.key.toLowerCase() === 'h') {
+                    if (event.ctrlKey) {
+                        // Ctrl + H: Increase height
+                        adjustProjectionHeight('increase', step);
+                    } else if (event.altKey) {
+                        // Alt + H: Decrease height
+                        adjustProjectionHeight('decrease', step);
+                    }
+                    event.preventDefault();
+                }
+
+                // Alternative width controls using [ and ] keys
+                if (event.key === '[') {
+                    adjustProjectionWidth('decrease', step);
+                    event.preventDefault();
+                }
+                if (event.key === ']') {
+                    adjustProjectionWidth('increase', step);
+                    event.preventDefault();
+                }
+
+                // Alternative height controls using ; and ' keys
+                if (event.key === ';') {
+                    adjustProjectionHeight('decrease', step);
+                    event.preventDefault();
+                }
+                if (event.key === "'") {
+                    adjustProjectionHeight('increase', step);
+                    event.preventDefault();
+                }
+            }
+        });
+
+        // Additional event listeners to ensure layout updates properly
+        window.addEventListener('orientationchange', () => {
+            console.log('📱 Orientation changed, updating layout...');
+            setTimeout(ensureCorrectLayout, 100); // Small delay for orientation to complete
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                console.log('👁️ Page became visible, checking layout...');
+                ensureCorrectLayout();
+            }
+        });
+
+        // Force layout update when window gains focus (useful when returning from other apps)
+        window.addEventListener('focus', () => {
+            console.log('🎯 Window focused, updating layout...');
+            ensureCorrectLayout();
+        });
+
+        // Also update layout when page is fully loaded (including images)
+        window.addEventListener('load', () => {
+            console.log('📄 Page fully loaded, ensuring correct layout...');
+            setTimeout(ensureCorrectLayout, 100);
+        });
+
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.attributeName === 'class' && mutation.target.classList.contains('screen')) {
+                    if (mutation.target.id === 'passwordScreen' && mutation.target.classList.contains('active')) {
+                        setTimeout(() => {
+                            const passwordInput = document.getElementById('passwordInput');
+                            if (passwordInput) passwordInput.focus();
+                        }, 300);
+                    }
+                    // When any screen becomes active, especially desktop, ensure layout is correct.
+                    // This is a bit redundant if resize/load already cover it, but good for safety.
+                    if (mutation.target.classList.contains('active')) {
+                         updateProjectionAreaLayout(); // Re-calculate on screen changes
+                    }
+                }
+            });
+        });
+
+        // Observe changes on #projectionArea or its children if needed,
+        // but observing direct children of body for class changes on .screen should be enough.
+        const projectionAreaNode = document.getElementById('projectionArea');
+        if (projectionAreaNode) {
+            observer.observe(projectionAreaNode, {
+                attributes: true,
+                subtree: true, // Observe descendants (the screens)
+                attributeFilter: ['class']
+            });
+        } else {
+            console.error("#projectionArea not found for MutationObserver.");
+        }
+    </script>
+</body>
+</html>

@@ -8,6 +8,7 @@ import VoteModal from './components/VoteModal';
 import SymbolicDonationModal from './components/SymbolicDonationModal';
 import SimpleSwapModal from './components/SimpleSwapModal';
 import MetaMaskSetupGuide from './components/MetaMaskSetupGuide';
+import CryptoWalletPage from './components/CryptoWalletPage';
 
 // Helper function to get signer
 const getSigner = () => {
@@ -120,7 +121,6 @@ const UnifiedEscapeRoom = () => {
     }
     return initialDefaultState;
   });
-
   const [isLoading, setIsLoading] = useState(false);
   const [userAddress, setUserAddress] = useState('');
   const [isTxLoadingModalOpen, setIsTxLoadingModalOpen] = useState(false);
@@ -132,6 +132,7 @@ const UnifiedEscapeRoom = () => {
   const [showSymbolicDonationModal, setShowSymbolicDonationModal] = useState(false);
   const [showSimpleSwapModal, setShowSimpleSwapModal] = useState(false);
   const [showSetupGuide, setShowSetupGuide] = useState(false);
+  const [showCryptoWalletPage, setShowCryptoWalletPage] = useState(false);
   const [seifVisible, setSeifVisible] = useState(false);
   const [solvedEffect, setSolvedEffect] = useState<number | null>(null);
   const [imageDimensions, setImageDimensions] = useState<ImageDimensions>({
@@ -599,16 +600,10 @@ const UnifiedEscapeRoom = () => {
         break;
     }
   };
-
   const handleSeifClick = () => {
     if (gameState.finalUnlocked) {
-      const combination = revealSafeCombination();
-      alert(`🔓 Seiful este deschis!
-      
-🎉 Felicitări! Ai rezolvat toate provocările!
-🔢 Combinația finală: ${combination}
-      
-Ai demonstrat adevăratul spirit Cypherpunk! 🏆`);
+      // Deschide pagina crypto wallet în loc de alert
+      setShowCryptoWalletPage(true);
       playVictorySound();
     }
   };
@@ -721,21 +716,6 @@ Ai demonstrat adevăratul spirit Cypherpunk! 🏆`);
 
         {/* Game UI Overlay */}
         <div className="absolute top-4 left-4 right-4 z-20">
-          {/* Header */}
-          <div className="bg-black/80 backdrop-blur-sm rounded-lg p-4 mb-4 border border-cyan-400/30">
-            <h1 className="text-2xl font-bold text-cyan-400 mb-2">🔐 Camera Secretă Cypherpunk</h1>
-            <div className="flex justify-between items-center text-sm">
-              <div className="text-gray-300">
-                Sertare deblocate: {gameState.drawersUnlocked.filter(Boolean).length}/6
-              </div>
-              {userAddress && (
-                <div className="text-blue-300">
-                  👤 {`${userAddress.slice(0, 6)}...${userAddress.slice(-4)}`}
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Controls */}
           <div className="flex gap-2 flex-wrap">
             <button
@@ -744,29 +724,8 @@ Ai demonstrat adevăratul spirit Cypherpunk! 🏆`);
             >
               🔄 Resetează
             </button>
-            <button
-              onClick={() => setShowSetupGuide(true)}
-              className="bg-blue-600/80 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm transition-colors backdrop-blur-sm"
-            >
-              ⚙️ Configurare MetaMask
-            </button>
           </div>
-        </div>
-
-        {/* Final Combination Display */}
-        {gameState.finalUnlocked && (
-          <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="bg-gradient-to-r from-yellow-600/90 to-orange-600/90 backdrop-blur-sm rounded-lg p-6 border-2 border-yellow-400 text-center">
-              <h2 className="text-3xl font-bold text-white mb-2">🎉 Felicitări! 🎉</h2>
-              <p className="text-yellow-100 mb-4">Combinația seifului este:</p>
-              <div className="bg-black/75 rounded-lg p-4 inline-block">
-                <span className="text-yellow-300 text-4xl font-mono tracking-widest">
-                  {revealSafeCombination()}
-                </span>
-              </div>
-            </div>
-          </div>
-        )}        {/* Instructions for empty areas */}
+        </div>        {/* Instructions for empty areas */}
         {!userAddress && (
           <div className="absolute bottom-4 left-4 right-4 z-20">
             <div className="bg-orange-600/80 backdrop-blur-sm rounded-lg p-4 border border-orange-400 text-center">
@@ -833,8 +792,13 @@ Ai demonstrat adevăratul spirit Cypherpunk! 🏆`);
         isOpen={showSetupGuide}
         onClose={() => setShowSetupGuide(false)}
       />      <TransactionLoadingModal
-        isOpen={isTxLoadingModalOpen}
-        transactionHash={currentTxHash}
+        isOpen={isTxLoadingModalOpen}      transactionHash={currentTxHash}
+      />
+
+      {/* Crypto Wallet Page Modal */}
+      <CryptoWalletPage 
+        isOpen={showCryptoWalletPage}
+        onClose={() => setShowCryptoWalletPage(false)}
       />
     </div>
   );
