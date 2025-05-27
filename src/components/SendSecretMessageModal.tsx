@@ -34,10 +34,9 @@ const SendSecretMessageModal: React.FC<SendSecretMessageModalProps> = ({
   };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto"><div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold flex items-center">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto"><div className="flex items-center justify-between mb-6">          <h3 className="text-xl font-bold flex items-center">
             <Send size={24} className="mr-2 text-purple-400" />
-            📧 Trimite Mesaj Secret
+            🎓 Lecția 4: Comunicare Liberă
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X size={20} />
@@ -47,11 +46,10 @@ const SendSecretMessageModal: React.FC<SendSecretMessageModalProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Left Column - Educational Content */}
           <div className="lg:w-1/2">
-            {/* Philosophy of Encrypted Communication */}
-            <div className="bg-gradient-to-r from-cyan-900 to-blue-900 bg-opacity-30 border border-cyan-600 rounded-md p-4 mb-4">
+            {/* Philosophy of Encrypted Communication */}            <div className="bg-gradient-to-r from-cyan-900 to-blue-900 bg-opacity-30 border border-cyan-600 rounded-md p-4 mb-4">
               <h4 className="text-sm font-semibold text-cyan-300 mb-3 flex items-center">
-                <span className="mr-2">🔒</span>
-                Filozofia Comunicației Criptate
+                <span className="mr-2">🎓</span>
+                Cypherpunk Academy - Comunicare Liberă
               </h4>
               <ul className="text-xs text-cyan-200 space-y-2">
                 <li>• <span className="font-semibold">Confidențialitatea Absolută:</span> Mesajele tale nu pot fi citite de terți</li>

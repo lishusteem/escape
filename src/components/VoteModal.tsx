@@ -37,10 +37,9 @@ const VoteModal: React.FC<VoteModalProps> = ({
     }
   };  return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto"><div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold flex items-center">
+      <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto"><div className="flex items-center justify-between mb-6">          <h3 className="text-xl font-bold flex items-center">
             <Vote size={24} className="mr-2 text-purple-400" />
-            Votează pentru Descentralizare
+            🎓 Lecția 3: Putere Descentralizată
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X size={20} />

@@ -287,22 +287,20 @@ const UnifiedEscapeRoom = () => {
       }, 1000);
     }
   }, [gameState.drawersUnlocked, seifVisible]);
-
   const checkMetaMask = () => {
     if (!window.ethereum) {
-      alert("MetaMask nu este instalat! Te rog să îl instalezi și să îl configurezi pentru rețeaua Sepolia.");
+      alert("🎓 Cypherpunk Academy necesită MetaMask pentru identitate digitală! Instalează și configurează pentru Sepolia.");
       return false;
     }
     if (!userAddress) {
-      alert("Te rog să conectezi portofelul MetaMask.");
+      alert("🔐 Conectează-ți identitatea digitală pentru a începe educația cypherpunk.");
       return false;
     }
     return true;
   };
-
   const connectMetaMask = async () => {
     if (!window.ethereum) {
-      alert("MetaMask nu este instalat! Te rog să îl instalezi și să îl configurezi pentru rețeaua Sepolia.");
+      alert("🎓 Cypherpunk Academy necesită MetaMask pentru identitate digitală! Instalează și configurează pentru Sepolia.");
       return;
     }
     
@@ -313,14 +311,14 @@ const UnifiedEscapeRoom = () => {
       
       if (accounts.length > 0) {
         setUserAddress(accounts[0]);
-        console.log('MetaMask conectat cu succes:', accounts[0]);
+        console.log('Identitate digitală activată:', accounts[0]);
       }
     } catch (error: any) {
-      console.error('Eroare la conectarea MetaMask:', error);
+      console.error('Eroare la activarea identității:', error);
       if (error.code === 4001) {
-        alert("Conectarea la MetaMask a fost anulată de utilizator.");
+        alert("Activarea identității digitale a fost anulată de utilizator.");
       } else {
-        alert("❌ Eroare la conectarea cu MetaMask. Încearcă din nou.");
+        alert("❌ Eroare la activarea identității Web3. Încearcă din nou.");
       }
     }
   };
@@ -397,7 +395,7 @@ const UnifiedEscapeRoom = () => {
     if (!checkMetaMask()) return;
     setIsLoading(true);
     try {
-      const message = "Susțin revoluția cypherpunk și libertatea financiară!";
+      const message = "Susțin Manifestul Cypherpunk: Privacy ca drept fundamental!";
       
       // Convertește mesajul în hex corect pentru MetaMask
       const hexMessage = ethers.utils.hexlify(ethers.utils.toUtf8Bytes(message));
@@ -406,14 +404,15 @@ const UnifiedEscapeRoom = () => {
       const signature = await window.ethereum!.request({
         method: 'personal_sign',
         params: [hexMessage, userAddress]
-      });
-      
-      setShowSignMessageModal(false);
-      unlockDrawer(0, "C");
-      alert(`🎉 Sertar 1 deblocat! Ai primit cifra 'C' pentru seif!
-      
-✍️ Mesajul a fost semnat cu succes!
-🔗 Semnătura: ${signature.slice(0, 20)}...`);
+      });      setShowSignMessageModal(false);
+      unlockDrawer(0, "7");
+      alert(`🎓 Lecția 1 Completată! Cifra '7' obținută!
+
+🔑 AI ÎNVĂȚAT: Semnătura digitală îți dovedește identitatea fără să o dezvălui
+✍️ Principiu Cypherpunk: "Codul este lege, matematica nu minte"
+🛡️ Aplicație practică: Autentificare securizată fără intermediari
+
+Semnătura: ${signature.slice(0, 20)}...`);
     } catch (error: any) {
       console.error('Eroare semnare mesaj:', error);
       if (error.code === 4001 || error.code === 'ACTION_REJECTED') {
@@ -442,14 +441,14 @@ const UnifiedEscapeRoom = () => {
         gasLimit: 50000
       });
       showMainTxLoadingModal(tx.hash);
-      await tx.wait();
-      setShowTimestampModal(false);
-      unlockDrawer(1, "Y");
-      alert(`🎉 Sertar 2 deblocat! Ai primit cifra 'Y' pentru seif!
-      
-⏰ Timestamp salvat pe blockchain!
-📅 Data: ${new Date().toLocaleString('ro-RO')}
-🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
+      await tx.wait();      setShowTimestampModal(false);      unlockDrawer(1, "3");      alert(`🎓 Lecția 2 Completată! Cifra '3' obținută!
+
+⏰ AI ÎNVĂȚAT: Blockchain-ul creează adevăruri care nu pot fi șterse
+📜 Principiu Cypherpunk: "Istoria scrisă în cod nu poate fi rescrisă"
+🌍 Aplicație practică: Dovezi temporale pentru contracte și documente
+
+Timestamp salvat: ${new Date().toLocaleString('ro-RO')}
+TX: ${tx.hash.slice(0, 10)}...`);
     } catch (error) {
       console.error('Eroare timestamp:', error);
       alert("❌ Eroare la crearea timestamp-ului. Verifică balanța și rețeaua.");
@@ -471,14 +470,14 @@ const UnifiedEscapeRoom = () => {
         gasLimit: 21000
       });
       showMainTxLoadingModal(tx.hash);
-      await tx.wait();
-      setShowVoteModal(false);
-      unlockDrawer(2, "P");
-      alert(`🎉 Sertar 3 deblocat! Ai primit cifra 'P' pentru seif!
-      
-🗳️ Votul pentru "${candidate}" a fost înregistrat!
-💰 Ai votat cu ${ethers.utils.formatEther(voteAmount)} ETH
-🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
+      await tx.wait();      setShowVoteModal(false);      unlockDrawer(2, "9");      alert(`🎓 Lecția 3 Completată! Cifra '9' obținută!
+
+🗳️ AI ÎNVĂȚAT: Democrația adevărată nu are lideri permanenți
+⚖️ Principiu Cypherpunk: "Puterea la popor prin matematică și cod"
+🌐 Aplicație practică: Guvernare transparentă fără corupție
+
+Votul pentru "${candidate}" înregistrat!
+TX: ${tx.hash.slice(0, 10)}...`);
     } catch (error) {
       console.error('Eroare vot:', error);
       alert("❌ Eroare la înregistrarea votului. Verifică balanța și rețeaua.");
@@ -503,13 +502,14 @@ const UnifiedEscapeRoom = () => {
         gasLimit: 50000
       });
       showMainTxLoadingModal(tx.hash);
-      await tx.wait();
-      setShowSecretMessageModal(false);
-      unlockDrawer(3, "H");
-      alert(`🎉 Sertar 4 deblocat! Ai primit cifra 'H' pentru seif!
-      
-📨 Mesajul secret "${message}" a fost trimis pe blockchain!
-🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
+      await tx.wait();      setShowSecretMessageModal(false);      unlockDrawer(3, "2");      alert(`🎓 Lecția 4 Completată! Cifra '2' obținută!
+
+📨 AI ÎNVĂȚAT: Comunicarea liberă nu poate fi cenzurată pe blockchain
+🕶️ Principiu Cypherpunk: "Informația vrea să fie liberă și privată"
+🛡️ Aplicație practică: Mesaje care rezistă la cenzură și supraveghere
+
+Mesajul "${message}" păstrat pentru veșnicie!
+TX: ${tx.hash.slice(0, 10)}...`);
     } catch (error: any) {
       console.error('Eroare trimitere mesaj:', error);
       let detailedMessage = "Verifică balanța și rețeaua (Sepolia), apoi încearcă din nou.";
@@ -536,14 +536,15 @@ const UnifiedEscapeRoom = () => {
         gasLimit: 21000
       });
       showMainTxLoadingModal(tx.hash);
-      await tx.wait();
-      setShowSymbolicDonationModal(false);
-      unlockDrawer(4, "E");
-      alert(`🎉 Sertar 5 deblocat! Ai primit cifra 'E' pentru seif!
-      
-💸 Donație simbolică pentru lista de mailing realizată cu succes!
-📧 Te-ai abonat cu succes la lista criptată!
-🔗 TX Hash: ${tx.hash.slice(0, 10)}...`);
+      await tx.wait();      setShowSymbolicDonationModal(false);      unlockDrawer(4, "8");
+      alert(`🎓 Lecția 5 Completată! Cifra '8' obținută!
+
+💝 AI ÎNVĂȚAT: Solidaritatea peer-to-peer înlocuiește caritatea centralizată
+🤝 Principiu Cypherpunk: "Comunitățile se susțin direct, fără intermediari"
+💪 Aplicație practică: Sprijin mutual fără taxe și birocrație
+
+Contribuția ta susține mișcarea!
+TX: ${tx.hash.slice(0, 10)}...`);
     } catch (error) {
       console.error('Eroare transfer:', error);
       alert("❌ Eroare la donația simbolică. Verifică balanța și rețeaua.");
@@ -553,14 +554,16 @@ const UnifiedEscapeRoom = () => {
     }
   };
 
-  const handleSimpleSwapSuccess = (txHash: string) => {
-    hideMainTxLoadingModal();
-    unlockDrawer(5, "R");
+  const handleSimpleSwapSuccess = (txHash: string) => {    hideMainTxLoadingModal();    unlockDrawer(5, "1");
     setShowSimpleSwapModal(false);
-    alert(`🎉 Sertar 6 deblocat! Ai primit cifra 'R' pentru seif!
-    
-🦄 Swap ETH → Token (Simulat) completat cu succes!
-🔗 TX Hash: ${txHash.slice(0, 10)}...`);
+    alert(`🎓 Lecția 6 Completată! Cifra '1' obținută!
+
+🔄 AI ÎNVĂȚAT: Poți fi propria ta bancă și casă de schimb
+🏦 Principiu Cypherpunk: "Elimină băncile, păstrează serviciile"
+💰 Aplicație practică: Finanțe personale complet autonome
+
+Primul tau swap descentralizat!
+TX: ${txHash.slice(0, 10)}...`);
   };
 
   const handleSimpleSwapError = (errorMessage: string) => {
@@ -605,28 +608,19 @@ const UnifiedEscapeRoom = () => {
       // Deschide pagina crypto wallet în loc de alert
       setShowCryptoWalletPage(true);
       playVictorySound();
-    }
-  };
-
-  const revealSafeCombination = () => {
-    let combination = "";
-    for (let i = 0; i < 6; i++) {
-      combination += gameState.safeCombinationDigits[i] || "_";
-    }
-    return combination;
-  };
+    }  };
 
   const getChallengeTitle = (areaNumber: number) => {
     const challengeType = DRAWER_CHALLENGES[areaNumber as keyof typeof DRAWER_CHALLENGES];
     const challengeTitles = {
-      signature: 'Semnătura Cypherpunk',
-      timestamp: 'Timestamp Blockchain',
-      vote: 'Vot Descentralizat',
-      transaction: 'Mesajul Secret',
-      donation: 'Abonament Lista Criptată',
-      swap: 'Swap ETH → Token'
+      signature: 'Lecția 1: Identitate Digitală',
+      timestamp: 'Lecția 2: Adevăr Immutabil',
+      vote: 'Lecția 3: Putere Descentralizată',
+      transaction: 'Lecția 4: Comunicare Liberă',
+      donation: 'Lecția 5: Solidaritate P2P',
+      swap: 'Lecția 6: Finanțe Autonome'
     };
-    return challengeTitles[challengeType] || `Provocarea ${areaNumber}`;
+    return challengeTitles[challengeType] || `Lecția ${areaNumber}`;
   };
 
   return (
@@ -699,17 +693,15 @@ const UnifiedEscapeRoom = () => {
         {seifVisible && (
           <div
             className="absolute cursor-pointer transition-all duration-300 border-2 border-yellow-400/50 rounded-lg z-10 bg-yellow-400/10 hover:border-yellow-400 hover:bg-yellow-400/20 hover:shadow-lg hover:shadow-yellow-400/60"
-            style={convertCoordinatesToPixels(AREA_COORDINATES.areaSeif)}
-            onClick={handleSeifClick}
-            title="Seiful - Clicește pentru a deschide!"
+            style={convertCoordinatesToPixels(AREA_COORDINATES.areaSeif)}            onClick={handleSeifClick}
+            title="🎓 Examenul Final - Clicește pentru a începe!"
           />
         )}
 
         {/* Solved Effect */}
         {solvedEffect && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">
-            <div className="text-6xl font-bold text-green-400 animate-bounce bg-black/50 px-8 py-4 rounded-lg">
-              ✅ Sertar {solvedEffect} Deblocat!
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-50">            <div className="text-6xl font-bold text-green-400 animate-bounce bg-black/50 px-8 py-4 rounded-lg">
+              ✅ Lecția {solvedEffect} Completată!
             </div>
           </div>
         )}
@@ -725,16 +717,15 @@ const UnifiedEscapeRoom = () => {
               🔄 Resetează
             </button>
           </div>
-        </div>        {/* Instructions for empty areas */}
-        {!userAddress && (
+        </div>        {/* Instructions for empty areas */}        {!userAddress && (
           <div className="absolute bottom-4 left-4 right-4 z-20">
-            <div className="bg-orange-600/80 backdrop-blur-sm rounded-lg p-4 border border-orange-400 text-center">
-              <p className="text-white mb-3">⚠️ Conectează-te cu MetaMask și asigură-te că ești pe rețeaua Sepolia pentru a începe!</p>
+            <div className="bg-green-600/80 backdrop-blur-sm rounded-lg p-4 border border-green-400 text-center">
+              <p className="text-white mb-3">🎓 Conectează-ți identitatea digitală pentru a începe Cypherpunk Academy!</p>
               <button
                 onClick={connectMetaMask}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors font-semibold"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white py-2 px-6 rounded-md transition-colors font-semibold"
               >
-                🦊 Conectează MetaMask
+                🔐 Activează Identitatea Web3
               </button>
             </div>
           </div>

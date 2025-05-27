@@ -18,10 +18,9 @@ const SymbolicDonationModal: React.FC<SymbolicDonationModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold flex items-center">
+        <div className="flex items-center justify-between mb-6">          <h3 className="text-xl font-bold flex items-center">
             <Mail size={24} className="mr-2 text-blue-400" />
-            💰 Abonament Mailing List Secret
+            🎓 Lecția 5: Solidaritate P2P
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X size={20} />
@@ -32,13 +31,12 @@ const SymbolicDonationModal: React.FC<SymbolicDonationModalProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Coloana stângă - Context educațional */}
           <div className="lg:w-1/2 space-y-4">
-            {/* Filosofia Susținerii Anonime */}
-            <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 rounded-lg p-4">
+            {/* Filosofia Susținerii Anonime */}            <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 rounded-lg p-4">
               <h4 className="text-indigo-300 font-semibold mb-3 flex items-center">
-                💰 Filozofia Susținerii Anonime
+                🎓 Cypherpunk Academy - Solidaritate P2P
               </h4>
               <p className="text-indigo-100 text-sm mb-3">
-                Susținerea anonimă este fundamentul libertății de expresie în era digitală, 
+                Această lecție îți arată cum susținerea anonimă este fundamentul libertății în era digitală, 
                 eliminând frica de represalii pentru susținerea cauzelor importante.
               </p>
               <div className="text-xs text-indigo-200 space-y-1">

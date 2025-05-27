@@ -27,20 +27,14 @@ const CypherpunkWelcomeMessage: React.FC<CypherpunkWelcomeMessageProps> = ({ onC
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center">
         <button
           onClick={() => setIsMinimized(false)}
-          className="bg-yellow-300 hover:bg-yellow-400 border-8 border-purple-700 text-purple-900 p-7 rounded-full shadow-2xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition-all duration-200 flex flex-col items-center animate-bounce"
-          style={{ minWidth: 110, minHeight: 110 }}
-          title="Deschide indiciile camerei Cypherpunk"
+          className="bg-white bg-opacity-95 hover:bg-purple-100 border-4 border-purple-500 text-purple-800 p-4 rounded-full shadow-2xl focus:outline-none focus:ring-4 focus:ring-purple-400 transition-all duration-200 animate-bounce flex flex-col items-center"
+          title="Deschide mesajul Cypherpunk și indiciile camerei"
         >
-          <span className="relative flex flex-col items-center">
-            <Shield className="h-16 w-16 text-purple-800 drop-shadow-lg" />
-            <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 text-5xl font-extrabold text-purple-700 drop-shadow-2xl">?</span>
-          </span>
+          <Shield className="h-10 w-10 mb-1 text-purple-700" />
         </button>
-        <div className="mt-4 text-2xl font-extrabold text-purple-900 text-center drop-shadow-sm select-none pointer-events-none tracking-wide uppercase">
-          INDICII
-        </div>
-        <div className="mt-1 text-xs text-purple-700 font-semibold text-center select-none pointer-events-none">
-          Mesajul Cypherpunk + Indicații
+        <div className="mt-2 text-xs font-bold text-purple-900 text-center drop-shadow-sm select-none pointer-events-none">
+          Mesajul Cypherpunk<br />
+          <span className="text-blue-700">+ Indicii</span>
         </div>
       </div>
     );
@@ -159,7 +153,7 @@ const CypherpunkWelcomeMessage: React.FC<CypherpunkWelcomeMessageProps> = ({ onC
               onClick={onClose}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 shadow-lg text-sm"
             >
-              🚀 Începe Aventura Cypherpunk
+              🚀 Continua
             </button>
             <p className="text-gray-400 mt-1 text-xs">
               6 provocări blockchain te așteaptă

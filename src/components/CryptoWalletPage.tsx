@@ -129,21 +129,20 @@ const WalletModal: React.FC<WalletModalProps> = ({ onClose, onWalletUnlocked }) 
           </div>
           
           <div className="flex-1 flex flex-col items-center justify-center text-center">
-            <div className="text-6xl mb-4 animate-bounce">🏆</div>
-            <div className="text-2xl text-yellow-400 mb-3 font-bold">
-              Felicitări, adevărat Cypherpunk!
+            <div className="text-6xl mb-4 animate-bounce">🏆</div>            <div className="text-2xl text-yellow-400 mb-3 font-bold">
+              🎓 Absolvent Cypherpunk Academy!
             </div>
             <div className="text-lg text-white/80 mb-6 max-w-xl">
-              Ai demonstrat cunoștințele necesare pentru a naviga în lumea crypto și blockchain.
+              Ai completat cu succes toate cele 6 lecții despre suveranitatea digitală și principiile cypherpunk.
             </div>
             
             <div className="bg-gradient-to-r from-cyan-400/20 to-pink-500/20 border border-cyan-400/50 rounded-xl p-6 mb-6 max-w-xl">
               <div className="text-xl font-bold text-yellow-400 mb-3">
-                🎯 Certificat de Finalizare
+                🏅 Certificat de Absolvire - Cypherpunk Academy
               </div>
               <div className="text-white/90 text-base leading-relaxed">
-                Continuă să explorezi lumea fascinantă a criptografiei și blockchain-ului.
-                <br/>Puterea este în mâinile celor care înțeleg tehnologia!
+                Acum înțelegi puterea tehnologiei descentralizate și importanța privacy-ului.
+                <br/>Aplică aceste cunoștințe pentru a construi un viitor mai liber!
               </div>
             </div>
 
@@ -350,15 +349,14 @@ const CryptoWalletPage: React.FC<CryptoWalletPageProps> = ({ isOpen, onClose }) 
     top: 0,             // 0% - overlay acoperă întreaga imagine de fundal
     width: 100,         // 100% - la fel ca imaginea de fundal
     height: 100         // 100% - la fel ca imaginea de fundal
-  };
-  // Secvența de mesaje de boot
+  };  // Secvența de mesaje de boot
   const bootSequence = [
-    "INITIALIZING QUANTUM ENCRYPTION PROTOCOLS...",
-    "ESTABLISHING SECURE BLOCKCHAIN CONNECTION...",
-    "LOADING CYPHERPUNK NETWORK INTERFACES...",
-    "VERIFYING CRYPTOGRAPHIC KEY SIGNATURES...",
-    "ACTIVATING PRIVACY PROTECTION SYSTEMS...",
-    "SYSTEM READY - AUTHENTICATION REQUIRED"
+    "INITIALIZING CYPHERPUNK ACADEMY SYSTEMS...",
+    "LOADING DIGITAL SOVEREIGNTY PROTOCOLS...",
+    "ESTABLISHING DECENTRALIZED KNOWLEDGE BASE...",
+    "VERIFYING CRYPTOGRAPHIC EDUCATIONAL MODULES...",
+    "ACTIVATING PRIVACY-FIRST LEARNING ENVIRONMENT...",
+    "ACADEMY READY - AUTHENTICATION REQUIRED"
   ];
 
   // Funcția pentru actualizarea layout-ului zonei de proiecție
@@ -608,12 +606,11 @@ const CryptoWalletPage: React.FC<CryptoWalletPageProps> = ({ isOpen, onClose }) 
             {currentScreen === 'boot' && (
               <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center transition-all duration-500">
                 <div className="bg-white/5 backdrop-blur-[10px] border border-white/10 rounded-[15px] p-6 shadow-lg max-w-[95%] max-h-[95%] mx-auto">
-                  <div className="text-center mb-6">
-                    <div className="text-[2rem] font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent mb-4 animate-pulse">
-                      CYPHERPUNK SYSTEM
+                  <div className="text-center mb-6">                    <div className="text-[2rem] font-bold bg-gradient-to-r from-cyan-400 to-pink-500 bg-clip-text text-transparent mb-4 animate-pulse">
+                      CYPHERPUNK ACADEMY
                     </div>
                     <div className="text-[0.9rem] text-white/60 mb-4 tracking-wide">
-                      QUANTUM ENCRYPTED • BLOCKCHAIN POWERED
+                      EDUCATIONAL SYSTEM • BLOCKCHAIN POWERED
                     </div>
                   </div>
                   <div className="mb-4 min-h-[150px] text-[0.8rem]">
@@ -650,22 +647,20 @@ const CryptoWalletPage: React.FC<CryptoWalletPageProps> = ({ isOpen, onClose }) 
             {currentScreen === 'password' && (
               <div className="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center transition-all duration-500">
                 <div className="bg-white/5 backdrop-blur-[10px] border border-white/10 rounded-[15px] p-6 shadow-lg w-4/5 max-w-md mx-auto">
-                  <div className="text-[3rem] mb-4 text-center">🔐</div>
-                  <div className="text-[1.8rem] font-bold mb-2 text-center bg-gradient-to-r from-cyan-400 to-white bg-clip-text text-transparent">
-                    SECURE ACCESS
+                  <div className="text-[3rem] mb-4 text-center">🔐</div>                  <div className="text-[1.8rem] font-bold mb-2 text-center bg-gradient-to-r from-cyan-400 to-white bg-clip-text text-transparent">
+                    ACADEMY ACCESS
                   </div>
                   <div className="text-white/60 text-[0.9rem] mb-6 text-center tracking-wide">
-                    AUTHORIZED PERSONNEL ONLY
+                    CYPHERPUNK GRADUATES ONLY
                   </div>
-                  <form onSubmit={handlePasswordSubmit} className="mb-4">
-                    <label className="block text-left mb-2 text-cyan-400 font-semibold text-[0.9rem]">
-                      ACCESS CODE REQUIRED:
+                  <form onSubmit={handlePasswordSubmit} className="mb-4">                    <label className="block text-left mb-2 text-cyan-400 font-semibold text-[0.9rem]">
+                      GRADUATION CODE REQUIRED:
                     </label>
                     <input 
                       type="password" 
                       name="password"
                       className="w-full bg-white/5 backdrop-blur-[10px] border-2 border-cyan-400/30 text-white p-3 rounded-[15px] font-mono text-[0.9rem] mb-4 outline-none transition-all duration-300 focus:border-cyan-400 focus:shadow-lg focus:shadow-cyan-400/30 focus:bg-white/8 hover:border-cyan-400/50"
-                      placeholder="Enter security passphrase..."
+                      placeholder="Enter Academy passphrase..."
                       autoComplete="off"
                     />
                     <button type="submit" className="w-full bg-gradient-to-r from-cyan-400 to-blue-600 text-black border-none p-3 rounded-[15px] font-bold text-[1rem] cursor-pointer transition-all duration-300 uppercase tracking-wide hover:from-cyan-300 hover:to-blue-500 hover:shadow-lg hover:shadow-cyan-400/40 hover:-translate-y-1">
@@ -678,9 +673,7 @@ const CryptoWalletPage: React.FC<CryptoWalletPageProps> = ({ isOpen, onClose }) 
                   </div>
                 </div>
               </div>
-            )}
-
-            {/* Ecranul Desktop */}
+            )}            {/* Ecranul Desktop */}
             {currentScreen === 'desktop' && (
               <div className="absolute top-0 left-0 w-full h-full transition-all duration-500">                {/* Iconița Desktop */}
                 <div 
@@ -695,13 +688,12 @@ const CryptoWalletPage: React.FC<CryptoWalletPageProps> = ({ isOpen, onClose }) 
 
                 {/* Bara de Taskuri */}
                 <div className="absolute bottom-0 left-0 right-0 h-12 bg-gray-800/80 backdrop-blur border-t border-gray-600/50 flex items-center px-4">
-                  <div className="w-8 h-8 bg-blue-600 rounded mr-4"></div>
-                  {walletOpen && (
+                  <div className="w-8 h-8 bg-blue-600 rounded mr-4"></div>                  {walletOpen && (
                     <div 
                       className="bg-gray-700/50 px-3 py-1 rounded cursor-pointer hover:bg-gray-600/50"
                       onClick={openWallet}
                     >
-                      Portofelul Secret
+                      💼 Portofelul Secret
                     </div>
                   )}
                 </div>

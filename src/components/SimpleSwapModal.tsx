@@ -21,10 +21,9 @@ const SimpleSwapModal: React.FC<SimpleSwapModalProps> = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold flex items-center">
+        <div className="flex items-center justify-between mb-6">          <h3 className="text-xl font-bold flex items-center">
             <ArrowLeftRight size={24} className="mr-2 text-blue-400" />
-            🔄 Swap ETH pentru Token (Simplu)
+            🎓 Lecția 6: Finanțe Autonome
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X size={20} />
@@ -35,13 +34,12 @@ const SimpleSwapModal: React.FC<SimpleSwapModalProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Coloana stângă - Context educațional */}
           <div className="lg:w-1/2 space-y-4">
-            {/* Filosofia Schimbului Descentralizat */}
-            <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 rounded-lg p-4">
+            {/* Filosofia Schimbului Descentralizat */}            <div className="bg-gradient-to-br from-indigo-900/30 to-purple-900/30 border border-indigo-500/30 rounded-lg p-4">
               <h4 className="text-indigo-300 font-semibold mb-3 flex items-center">
-                ⚖️ Filozofia Schimbului Descentralizat
+                🎓 Cypherpunk Academy - Finanțe Autonome
               </h4>
               <p className="text-indigo-100 text-sm mb-3">
-                Schimburile descentralizate elimină intermediarii din tranzacții, 
+                Această lecție finală îți arată cum schimburile descentralizate elimină intermediarii, 
                 permițând schimburi directe între utilizatori fără autoritate centrală.
               </p>
               <div className="text-xs text-indigo-200 space-y-1">

@@ -18,14 +18,13 @@ const SignMessageModal: React.FC<SignMessageModalProps> = ({
 
   if (!isOpen) return null;
 
-  const message = "Susțin revoluția cypherpunk și libertatea financiară!";
+  const message = "Susțin Manifestul Cypherpunk: Privacy ca drept fundamental!";
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-gray-800 p-6 rounded-lg shadow-xl text-white w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-xl font-bold flex items-center">
+        <div className="flex items-center justify-between mb-6">          <h3 className="text-xl font-bold flex items-center">
             <PenTool size={24} className="mr-2 text-blue-400" />
-            🔐 Semnătură Digitală
+            🎓 Lecția 1: Identitate Digitală
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-white">
             <X size={20} />
@@ -36,14 +35,13 @@ const SignMessageModal: React.FC<SignMessageModalProps> = ({
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Coloana stângă - Context educațional */}
           <div className="lg:w-1/2 space-y-4">
-            {/* Filosofia Cypherpunk */}
-            <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-lg p-4">
+            {/* Filosofia Cypherpunk */}            <div className="bg-gradient-to-br from-cyan-900/30 to-blue-900/30 border border-cyan-500/30 rounded-lg p-4">
               <h4 className="text-cyan-300 font-semibold mb-3 flex items-center">
-                ⚡ Filosofia Cypherpunk
+                🎓 Cypherpunk Academy - Fundamentele
               </h4>
               <p className="text-cyan-100 text-sm mb-3">
-                "Cypherpunks write code" - Eric Hughes, 1993. Semnăturile digitale sunt fundamentul 
-                identității descentralizate, eliminând nevoia de autorități centrale pentru validare.
+                "Cypherpunks write code" - Eric Hughes, 1993. În această lecție descoperi cum 
+                semnăturile digitale îți oferă identitate autonomă, fără autorități centrale.
               </p>
               <div className="text-xs text-cyan-200 space-y-1">
                 <div>• <strong>Auto-suveranitate:</strong> Tu îți controlezi identitatea</div>
@@ -66,14 +64,13 @@ const SignMessageModal: React.FC<SignMessageModalProps> = ({
               </div>
             </div>
 
-            {/* Impactul Social */}
-            <div className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border border-emerald-500/30 rounded-lg p-4">
+            {/* Impactul Social */}            <div className="bg-gradient-to-br from-emerald-900/30 to-green-900/30 border border-emerald-500/30 rounded-lg p-4">
               <h4 className="text-emerald-300 font-semibold mb-3">
-                🌍 Impactul Social
+                🌍 Aplicații în Lumea Reală
               </h4>
               <p className="text-emerald-100 text-sm mb-2">
-                Semnăturile digitale democratizează autentificarea, permițând oricui să-și 
-                dovedească identitatea fără documente de stat sau corporații.
+                Semnăturile digitale democratizează autentificarea, oferind oricui puterea 
+                să-și dovedească identitatea fără documente de stat sau corporații.
               </p>
               <div className="text-xs text-emerald-200 space-y-1">
                 <div>• <strong>Activiști:</strong> Protejează identitatea în regimuri opresive</div>
