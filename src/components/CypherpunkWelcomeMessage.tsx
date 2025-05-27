@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Shield, Key, Zap, Copy, ExternalLink, Minimize2, X } from 'lucide-react';
 
 const DONATION_ADDRESS = '0x742d35cc6634c0532925a3b844bc454e4438f44e';
-const SATOSHI_MESSAGE = 'Cancelarul este pe punctul de a aproba al doilea bailout';
+// Satoshi quote for reference: "Cancelarul este pe punctul de a aproba al doilea bailout"
 
 interface CypherpunkWelcomeMessageProps {
   onClose: () => void;
@@ -153,7 +153,7 @@ const CypherpunkWelcomeMessage: React.FC<CypherpunkWelcomeMessageProps> = ({ onC
               onClick={onClose}
               className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-2 px-4 rounded-xl transition-all duration-300 shadow-lg text-sm"
             >
-              🚀 Continua
+              🚀 Începe Aventura Cypherpunk
             </button>
             <p className="text-gray-400 mt-1 text-xs">
               6 provocări blockchain te așteaptă

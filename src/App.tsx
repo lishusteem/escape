@@ -2,7 +2,7 @@ import { useState } from 'react'
 import CameraEntry from './CameraEntry'
 import UnifiedEscapeRoom from './UnifiedEscapeRoom'
 import CypherpunkWelcomeMessage from './components/CypherpunkWelcomeMessage'
-import { Shield, AlertCircle } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 function App() {
   const [isEntryComplete, setIsEntryComplete] = useState(false);
@@ -41,9 +41,6 @@ function App() {
           )}
         </>
       )}
-      <div className="max-w-6xl mx-auto">
-        {/* Eliminat headerul și containerul cu butonul de resetare */}
-      </div>
     </>
   );
 }

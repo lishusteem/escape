@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { ethers } from 'ethers';
 import { 
   FileSignature, 
@@ -35,27 +35,6 @@ interface GameState {
   safeCombinationDigits: { [key: number]: string };
   finalUnlocked: boolean;
 }
-
-// Drawer to crypto challenge mapping
-const DRAWER_CHALLENGES = {
-  1: 'signature',    // Sign message challenge
-  2: 'transaction',  // Send secret message challenge
-  3: 'vote',         // Voting challenge
-  4: 'timestamp',    // Timestamp challenge
-  5: 'donation',     // Symbolic donation challenge
-  6: 'swap'          // Token swap challenge
-} as const;
-
-// Area coordinates for clickable regions (relative to background image)
-const AREA_COORDINATES = {
-  area1: { left: '17%', top: '25%', width: '22%', height: '15%' },
-  area2: { left: '17%', top: '42%', width: '22%', height: '15%' },
-  area3: { left: '17%', top: '60%', width: '22%', height: '15%' },
-  area4: { left: '62%', top: '25%', width: '22%', height: '15%' },
-  area5: { left: '62%', top: '42%', width: '22%', height: '15%' },
-  area6: { left: '62%', top: '60%', width: '22%', height: '15%' },
-  areaSeif: { left: '60%', top: '32%', width: '18%', height: '22%' }
-};
 
 const EscapeRoom = () => {
   const [gameState, setGameState] = useState<GameState>(() => {
